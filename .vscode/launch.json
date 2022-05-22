@@ -1,0 +1,195 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'horus_finance'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=horus_finance"
+                ],
+                "filter": {
+                    "name": "horus_finance",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'horus_finance'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=horus_finance",
+                    "--package=horus_finance"
+                ],
+                "filter": {
+                    "name": "horus_finance",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'horus_finance'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=horus_finance",
+                    "--package=horus_finance"
+                ],
+                "filter": {
+                    "name": "horus_finance",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'horus_data_streams'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=horus_data_streams"
+                ],
+                "filter": {
+                    "name": "horus_data_streams",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'horus_order_routing'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=horus_order_routing"
+                ],
+                "filter": {
+                    "name": "horus_order_routing",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'horus_strategies'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=horus_strategies"
+                ],
+                "filter": {
+                    "name": "horus_strategies",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'horus_autoquant'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=horus_autoquant",
+                    "--package=horus_autoquant"
+                ],
+                "filter": {
+                    "name": "horus_autoquant",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'horus_autoquant'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=horus_autoquant",
+                    "--package=horus_autoquant"
+                ],
+                "filter": {
+                    "name": "horus_autoquant",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'horus_agent'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=horus_agent",
+                    "--package=horus_agent"
+                ],
+                "filter": {
+                    "name": "horus_agent",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'horus_agent'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=horus_agent",
+                    "--package=horus_agent"
+                ],
+                "filter": {
+                    "name": "horus_agent",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

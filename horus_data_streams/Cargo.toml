@@ -1,0 +1,13 @@
+[package]
+name = "horus_data_streams"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# INTERNAL
+horus_finance = { path = "../horus_finance"}
+
+# EXTERNAL
+heapless = "0.7.10"
+chrono = "0.4.19"
+binance = { git = "https://github.com/wisespace-io/binance-rs.git" }
