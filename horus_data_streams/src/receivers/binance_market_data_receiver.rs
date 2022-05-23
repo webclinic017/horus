@@ -1,7 +1,7 @@
 use std::sync::atomic::AtomicBool;
 
-use horus_finance::Aggregate;
-use binance::{websockets::*, market::Market, model::KlineSummary, api::Binance};
+use horus_finance::{Aggregate, AggregatedMarketData};
+use binance::{websockets::*, market::Market, api::Binance};
 
 use super::data_receiver::DataReceiver;
 
@@ -10,33 +10,6 @@ pub struct BinanceMarketDataReceiver {
     symbol: String,
     interval: String
 }
-
-    
-// impl BTCEURBinanceMarketDataReceiver {
-
-//     pub fn start_listening<'a>(&self, on_data_receive: &'a dyn Fn(Aggregate)) {
-        
-//         let keep_running = AtomicBool::new(true);
-//         let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
-//             match event {
-//                 WebsocketEvent::Kline(kline_event) => {
-//                     let new_aggregate = Aggregate {
-//                         open: kline_event.kline.open.parse::<f32>().unwrap(),
-//                         close: kline_event.kline.close.parse::<f32>().unwrap()
-//                     };
-//                     println!("Received binance data");
-//                     on_data_receive(new_aggregate);
-//                 },
-//                 _ => (),
-//             };
-//             Ok(())
-//         });
-
-//         let kline: String = format!("{}", "btceur@kline_1m");
-//         web_socket.connect(&kline).unwrap();
-//         web_socket.event_loop(&keep_running).unwrap();
-//     }
-// }
 
 impl BinanceMarketDataReceiver {
     pub fn new(symbol: String, interval: String) -> BinanceMarketDataReceiver {
@@ -50,12 +23,32 @@ impl BinanceMarketDataReceiver {
 
 impl DataReceiver for BinanceMarketDataReceiver {
     fn start_listening(&self, on_data_receive: &dyn Fn()) {
-        todo!()
+            let keep_running = AtomicBool::new(true);
+            let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
+                match event {
+                    WebsocketEvent::Kline(_) => { //kline_event) => {
+                        // let new_aggregate = Aggregate {
+                        //     open: kline_event.kline.open.parse::<f32>().unwrap(),
+                        //     close: kline_event.kline.close.parse::<f32>().unwrap()
+                        // };
+                        // println!("Received binance data");
+                        on_data_receive();
+                    },
+                    _ => (),
+                };
+                Ok(())
+            });
+
+        let kline: String = format!("{}", "btceur@kline_1m");
+        web_socket.connect(&kline).unwrap();
+        web_socket.event_loop(&keep_running).unwrap();
     }
 
-    fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> Vec<Aggregate> {
+    fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> AggregatedMarketData {
 
-        match self.market.get_klines(&self.symbol, &self.interval, 800, None, None) {
+        let start_time = u64::try_from(start.timestamp_millis()).unwrap();
+        let end_time = u64::try_from(end.timestamp_millis()).unwrap();
+        match self.market.get_klines(&self.symbol, &self.interval, None, start_time , end_time) {
             Ok(klines) => {
                 match klines {
                     binance::model::KlineSummaries::AllKlineSummaries(klines) => {
@@ -67,11 +60,18 @@ impl DataReceiver for BinanceMarketDataReceiver {
                             };
                             formatted.push(aggregate);
                         }
-                        formatted
+                        AggregatedMarketData {
+                            aggregates: formatted,
+                            exchange_name: String::from("BINANCE"),
+                            market_name: String::from(&self.symbol),
+                            aggregation_length: String::from(&self.interval),
+                            start_time: start,
+                            end_time: end
+                        }
                     }
                 }
             },
-            Err(e) => panic!("Unable to receive market data from binance"),
+            _ => panic!("Unable to receive market data from binance"),
         }
     }
 }

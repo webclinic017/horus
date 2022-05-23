@@ -1,3 +1,5 @@
+use chrono::{DateTime, Utc};
+
 #[derive(Debug)]
 
 /// An aggregated time span of financial market data.
@@ -12,6 +14,17 @@ impl Clone for Aggregate {
     }
 }
 
+/// A fixed amount of aggregated market data. All aggregates must have the same length
+/// and must not contain any gaps.
+#[derive(Debug)]
+pub struct AggregatedMarketData {
+    pub aggregates: Vec<Aggregate>,
+    pub exchange_name: String,
+    pub market_name: String,
+    pub aggregation_length: String,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>
+}
 #[derive(Debug)]
 /// The type of the order.
 pub enum OrderSide {

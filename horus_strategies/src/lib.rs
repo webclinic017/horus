@@ -1,9 +1,13 @@
 use postgres::types::ToSql;
 
 pub trait Strategy {
-    fn get_name(self) -> String;
+    fn get_name(&self) -> &'static str;
     fn get_params<'a>(&'a self) -> Vec<(String, &'a (dyn ToSql + Sync))>;
 }
+
+// pub trait ParameterizedStrategy {
+
+// }
 
 pub struct GoldenCrossStrategy {
     pub first_sma: u32,
@@ -11,8 +15,8 @@ pub struct GoldenCrossStrategy {
 }
 
 impl Strategy for GoldenCrossStrategy {
-    fn get_name(self) -> String {
-        todo!()
+    fn get_name(&self) -> &'static str {
+        return "GoldenCross";
     }
 
     fn get_params<'a>(&'a self) -> Vec<(String, &'a (dyn ToSql + Sync))> {
