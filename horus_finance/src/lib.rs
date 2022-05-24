@@ -28,8 +28,10 @@ pub struct AggregatedMarketData {
 
 /// The type of the order.
 #[derive(Debug)]
+#[derive(PartialEq)]
 pub enum OrderSide {
     SELL,
+    HOLD,
     BUY
 }
 

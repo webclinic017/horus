@@ -8,6 +8,7 @@ fn add_order_side(map: &mut HashMap<&str, &str>, order_type: &OrderSide) {
     match order_type {
         OrderSide::BUY => { map.insert("side", "buy"); },
         OrderSide::SELL => { map.insert("side", "sell"); },
+        _ => {},
     }
 }
 
@@ -23,7 +24,7 @@ fn validate_order(side: &OrderSide, quantity: &f32, price: &f32) {
                 panic!("Invalid order");
             }
         }
-        OrderSide::SELL => {},
+        _ => {},
     }
 }
 
