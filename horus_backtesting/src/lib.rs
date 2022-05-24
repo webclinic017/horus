@@ -71,7 +71,7 @@ pub fn run_backtest(market_data: &AggregatedMarketData, strategy: &dyn Strategy)
 
     BacktestResult { 
         profit_loss_rel: strategy_rel, 
-        profit_loss_abs: amount_quote - market_data.aggregates[0].open, 
-        alpha 
+        profit_loss_abs: amount_quote - market_data.aggregates[0].open,
+        alpha
     }
 }
