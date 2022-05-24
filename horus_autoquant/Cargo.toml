@@ -8,6 +8,7 @@ edition = "2021"
 horus_finance = { path = "../horus_finance" }
 horus_data_streams = { path = "../horus_data_streams" }
 horus_strategies = { path = "../horus_strategies" }
+horus_backtesting = { path = "../horus_backtesting" }
 
 # EXTERNAL
 postgres = "0.19.3"

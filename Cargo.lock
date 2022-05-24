@@ -523,10 +523,19 @@ name = "horus_autoquant"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "horus_backtesting",
  "horus_data_streams",
  "horus_finance",
  "horus_strategies",
  "postgres",
+]
+
+[[package]]
+name = "horus_backtesting"
+version = "0.1.0"
+dependencies = [
+ "horus_finance",
+ "horus_strategies",
 ]
 
 [[package]]
@@ -561,7 +570,7 @@ dependencies = [
 name = "horus_strategies"
 version = "0.1.0"
 dependencies = [
- "postgres",
+ "horus_finance",
 ]
 
 [[package]]

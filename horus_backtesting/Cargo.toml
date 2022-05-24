@@ -1,0 +1,9 @@
+[package]
+name = "horus_backtesting"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# INTERNAL
+horus_finance = { path = "../horus_finance" }
+horus_strategies = { path = "../horus_strategies" }

@@ -1,8 +1,8 @@
 use chrono::{DateTime, Utc};
 
+/// An aggregated time span of financial market data.
 #[derive(Debug)]
 
-/// An aggregated time span of financial market data.
 pub struct Aggregate {
     pub open: f32,
     pub close: f32
@@ -25,8 +25,9 @@ pub struct AggregatedMarketData {
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>
 }
-#[derive(Debug)]
+
 /// The type of the order.
+#[derive(Debug)]
 pub enum OrderSide {
     SELL,
     BUY
