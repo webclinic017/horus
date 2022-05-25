@@ -1,26 +1,28 @@
+use std::cell::RefCell;
+
 use heapless::spsc::Queue;
 use horus_finance::Aggregate;
 
 const QUEUE_SIZE: usize = 256;
 
 pub struct Sequence<T> {
-    pub data: Queue<T, QUEUE_SIZE>
+    pub data: RefCell<Queue<T, QUEUE_SIZE>>
 }
 
 impl Sequence<Aggregate> {
     pub fn new() -> Sequence<Aggregate> {
         Sequence{
-            data: Queue::new()
+            data: RefCell::new(Queue::new())
         }
     }
 
-    pub fn enqueue(&mut self, next_aggregate: &Aggregate) {
+    pub fn enqueue(&self, next_aggregate: &Aggregate) {
 
-        if self.data.is_full() {
-            self.data.dequeue().unwrap();
+        if self.data.borrow().is_full() {
+            self.data.borrow_mut().dequeue().unwrap();
         }
 
-        self.data.enqueue(*next_aggregate).unwrap();
+        self.data.borrow_mut().enqueue(*next_aggregate).unwrap();
         // enqueue
         // update moving avg
         // update ...
@@ -28,7 +30,7 @@ impl Sequence<Aggregate> {
 
     pub fn get_sma(&self, range: &u16) -> Option<f32> {
 
-        let current_size: u16 = self.data.len().try_into().unwrap();
+        let current_size: u16 = self.data.borrow().len().try_into().unwrap();
 
         if current_size < *range {
             return None
@@ -40,7 +42,7 @@ impl Sequence<Aggregate> {
 
         for index in start..current_size {
 
-            total += self.data.iter().nth(index.into()).unwrap().close;
+            total += self.data.borrow().iter().nth(index.into()).unwrap().close;
         }
 
         Some(total / (*range as f32))

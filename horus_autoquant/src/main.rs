@@ -16,7 +16,7 @@ fn get_strategy_collections() -> Vec<&'static dyn Fn() -> Vec<Box<dyn Strategy>>
     strategy_collections
 }
 
-fn find_best_strategy(market_data: &AggregatedMarketData) -> Box<dyn Strategy> {
+fn find_best_strategy(market_data: &AggregatedMarketData) -> (Box<dyn Strategy>, BacktestResult) {
 
     let mut best_result: Option<BacktestResult> = None;
     let mut best_strategy: Option<Box<dyn Strategy>> = None;
@@ -43,7 +43,8 @@ fn find_best_strategy(market_data: &AggregatedMarketData) -> Box<dyn Strategy> {
     }
 
     let best_strategy = best_strategy.unwrap();
-    best_strategy
+    let best_result = best_result.unwrap();
+    (best_strategy, best_result)
 }
 
 fn main() {
@@ -55,11 +56,11 @@ fn main() {
     let market_data: AggregatedMarketData = receiver.get_historical_data(start, end);
 
     //2. Describe Reporters
-    let reporters: Vec<&dyn Fn(&AggregatedMarketData, &Box<dyn Strategy>) -> ()> = vec!(&report_to_console);
+    let reporters: Vec<&dyn Fn(&AggregatedMarketData, &Box<dyn Strategy>, &BacktestResult) -> ()> = vec!(&report_to_console);
 
     //3. Run
-    let best_strategy = find_best_strategy(&market_data);
+    let (best_strategy, best_result) = find_best_strategy(&market_data);
     for r in reporters {
-        r(&market_data, &best_strategy);
+        r(&market_data, &best_strategy, &best_result);
     }
 }

@@ -13,7 +13,7 @@ impl<'a> LemonMarketsStream<'a> {
     pub fn connect(&self) {
         let on_data_receive = |nd: Aggregate| {
             {
-                let mut data_write = self.data_sequence.lock().unwrap();
+                let data_write = self.data_sequence.lock().unwrap();
                 
                 data_write.enqueue(&nd);
             }

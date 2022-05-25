@@ -1,9 +1,11 @@
+use std::cell::RefCell;
+
 use crate::Strategy;
 use horus_data_streams::sequences::sequence::Sequence;
 use horus_finance::{Aggregate, OrderSide};
 
 struct GoldenCrossStrategyState {
-    short_below_long: Option<bool>
+    short_below_long: RefCell<Option<bool>>
 }
 
 pub struct GoldenCrossStrategy {
@@ -21,13 +23,13 @@ impl GoldenCrossStrategy {
             second_sma: longer,
             first_sma_seq: Sequence::<Aggregate>::new(),
             second_sma_seq: Sequence::<Aggregate>::new(),
-            state: GoldenCrossStrategyState { short_below_long: None }
+            state: GoldenCrossStrategyState { short_below_long: RefCell::new(None) }
         }
     }
 }
 
 impl Strategy for GoldenCrossStrategy {
-    fn next(& mut self, aggregate: &Aggregate) -> Option<OrderSide> {
+    fn next(&self, aggregate: &Aggregate) -> Option<OrderSide> {
         self.first_sma_seq.enqueue(aggregate);
         self.second_sma_seq.enqueue(aggregate);
 
@@ -38,10 +40,11 @@ impl Strategy for GoldenCrossStrategy {
             Some(f_val) => {
                 match second_sma_value {
                     Some(s_val) => {
-                        match self.state.short_below_long {
+                        match *self.state.short_below_long.borrow() {
                             Some(state) => {
+                                let mut borrowed_ref = self.state.short_below_long.borrow_mut();
                                 if f_val > s_val {
-                                    self.state.short_below_long = Some(false);
+                                    *borrowed_ref = Some(false);
                                     if state {
                                         Some(OrderSide::SELL)
                                     } else {
@@ -49,7 +52,7 @@ impl Strategy for GoldenCrossStrategy {
                                     }
                                     
                                 } else {
-                                    self.state.short_below_long = Some(true);
+                                    *borrowed_ref = Some(true);
                                     if state {
                                         Some(OrderSide::HOLD)
                                     } else {
@@ -58,10 +61,11 @@ impl Strategy for GoldenCrossStrategy {
                                 }
                             }
                             None => {
+                                let mut borrowed_ref = self.state.short_below_long.borrow_mut();
                                 if f_val > s_val {
-                                    self.state.short_below_long = Some(false);
+                                    *borrowed_ref = Some(false);
                                 } else {
-                                    self.state.short_below_long = Some(true);
+                                    *borrowed_ref = Some(true);
                                 }
                                 None
                             }
@@ -92,5 +96,6 @@ pub fn generate_strategy_matrix() -> Vec<Box<dyn Strategy>> {
     let strategy_02 = GoldenCrossStrategy::new(20, 60);
     let mut matrix: Vec<Box<dyn Strategy>> = Vec::<Box<dyn Strategy>>::new();
     matrix.push(Box::new(strategy_01));
+    matrix.push(Box::new(strategy_02));
     matrix
 }

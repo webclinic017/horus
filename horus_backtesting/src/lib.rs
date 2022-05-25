@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use horus_finance::{AggregatedMarketData, OrderSide};
 use horus_strategies::Strategy;
 
@@ -39,7 +37,7 @@ impl Copy for BacktestResult {
     
 }
 
-pub fn run_backtest(market_data: &AggregatedMarketData, strategy: &Cell<dyn Strategy>) -> BacktestResult {
+pub fn run_backtest(market_data: &AggregatedMarketData, strategy: &Box<dyn Strategy>) -> BacktestResult {
 
     let mut amount_asset: f32 = 0.;
     let mut amount_quote: f32 = market_data.aggregates[0].open;
