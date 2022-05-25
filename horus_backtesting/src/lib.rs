@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use horus_finance::{AggregatedMarketData, OrderSide};
 use horus_strategies::Strategy;
 
@@ -37,7 +39,7 @@ impl Copy for BacktestResult {
     
 }
 
-pub fn run_backtest(market_data: &AggregatedMarketData, strategy: &dyn Strategy) -> BacktestResult {
+pub fn run_backtest(market_data: &AggregatedMarketData, strategy: &Cell<dyn Strategy>) -> BacktestResult {
 
     let mut amount_asset: f32 = 0.;
     let mut amount_quote: f32 = market_data.aggregates[0].open;
@@ -45,22 +47,27 @@ pub fn run_backtest(market_data: &AggregatedMarketData, strategy: &dyn Strategy)
 
     for aggregate in &market_data.aggregates {
         let orderside = strategy.next(&aggregate);
-        if orderside != current_side {
-            match orderside {
-                OrderSide::SELL => {
-                    amount_quote = amount_asset * aggregate.close;
-                    amount_asset = 0.;
-                    current_side = OrderSide::SELL;
-                }
-                OrderSide::HOLD => {
-                    current_side = OrderSide::HOLD;
-                 }
-                OrderSide::BUY => {
-                    amount_asset = amount_quote * aggregate.close;
-                    amount_quote = 0.;
-                    current_side = OrderSide::BUY
+        match orderside {
+            Some(side) => {
+                if side != current_side {
+                    match side {
+                        OrderSide::SELL => {
+                            amount_quote = amount_asset * aggregate.close;
+                            amount_asset = 0.;
+                            current_side = OrderSide::SELL;
+                        }
+                        OrderSide::HOLD => {
+                            current_side = OrderSide::HOLD;
+                         }
+                        OrderSide::BUY => {
+                            amount_asset = amount_quote * aggregate.close;
+                            amount_quote = 0.;
+                            current_side = OrderSide::BUY
+                        }
+                    }
                 }
             }
+            _ => {}
         } 
     }
 

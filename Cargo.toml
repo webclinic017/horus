@@ -4,8 +4,8 @@ members = [
     "horus_finance",
     "horus_data_streams",
     "horus_order_routing",
-    "horus_strategies",
     "horus_backtesting",
+    "horus_strategies",
     "horus_autoquant",
     "horus_agent"
 ]

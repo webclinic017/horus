@@ -4,6 +4,6 @@ use horus_finance::{OrderSide, Aggregate};
 
 pub trait Strategy {
     fn get_name(&self) -> &'static str;
-    fn next(&self, aggregate: &Aggregate) -> OrderSide;
+    fn next(&mut self, aggregate: &Aggregate) -> Option<OrderSide>;
     fn print_values_to_console(&self);
 }

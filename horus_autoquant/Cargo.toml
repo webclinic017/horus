@@ -11,5 +11,6 @@ horus_strategies = { path = "../horus_strategies" }
 horus_backtesting = { path = "../horus_backtesting" }
 
 # EXTERNAL
-postgres = "0.19.3"
 chrono = "0.4.19"
+postgres = "0.19.3"
+colored = "2.0.0"

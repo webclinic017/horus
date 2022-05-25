@@ -1,9 +1,9 @@
 use std::sync::{Arc, Mutex};
 use horus_finance::Aggregate;
-use crate::{receivers::lemon_markets_data_receiver::LemonMarketsDataReceiver, sequences::market_data_sequence::MarketDataSequence};
+use crate::{receivers::lemon_markets_data_receiver::LemonMarketsDataReceiver, sequences::sequence::Sequence};
 
 pub struct LemonMarketsStream<'a> {
-    pub data_sequence: &'a Arc<Mutex<MarketDataSequence>>,
+    pub data_sequence: &'a Arc<Mutex<Sequence<Aggregate>>>,
     pub receiver: LemonMarketsDataReceiver,
     pub strategy: Option<&'a dyn Fn()>,
 }
@@ -15,7 +15,7 @@ impl<'a> LemonMarketsStream<'a> {
             {
                 let mut data_write = self.data_sequence.lock().unwrap();
                 
-                data_write.enqueue(nd);
+                data_write.enqueue(&nd);
             }
 
             match self.strategy {

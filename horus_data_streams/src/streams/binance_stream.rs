@@ -1,8 +1,9 @@
 use std::sync::{Arc, Mutex};
-use crate::{receivers::binance_market_data_receiver::BinanceMarketDataReceiver, sequences::market_data_sequence::MarketDataSequence};
+use horus_finance::Aggregate;
+use crate::{receivers::binance_market_data_receiver::BinanceMarketDataReceiver, sequences::sequence::Sequence};
 
 pub struct BinanceStream<'a> {
-    pub data_sequence: &'a Arc<Mutex<MarketDataSequence>>,
+    pub data_sequence: &'a Arc<Mutex<Sequence<Aggregate>>>,
     pub receiver: BinanceMarketDataReceiver,
     pub strategy: Option<&'a dyn Fn()>,
 }

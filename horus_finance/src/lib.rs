@@ -14,6 +14,10 @@ impl Clone for Aggregate {
     }
 }
 
+impl Copy for Aggregate {
+    
+}
+
 /// A fixed amount of aggregated market data. All aggregates must have the same length
 /// and must not contain any gaps.
 #[derive(Debug)]
