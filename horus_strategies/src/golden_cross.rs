@@ -40,36 +40,28 @@ impl Strategy for GoldenCrossStrategy {
             Some(f_val) => {
                 match second_sma_value {
                     Some(s_val) => {
-                        match *self.state.short_below_long.borrow() {
-                            Some(state) => {
-                                let mut borrowed_ref = self.state.short_below_long.borrow_mut();
-                                if f_val > s_val {
-                                    *borrowed_ref = Some(false);
-                                    if state {
-                                        Some(OrderSide::SELL)
-                                    } else {
-                                        Some(OrderSide::HOLD)
-                                    }
-                                    
-                                } else {
-                                    *borrowed_ref = Some(true);
-                                    if state {
-                                        Some(OrderSide::HOLD)
-                                    } else {
-                                        Some(OrderSide::BUY)
+                        let next_short_below_long: bool = f_val < s_val;
+                        let mut side_to_return: Option<OrderSide> = None;
+                        {
+                            let tmp_ref = self.state.short_below_long.borrow();
+                            match *tmp_ref {
+                                Some(s) => { 
+                                    let last_short_below_long = s;
+                                    if next_short_below_long && !last_short_below_long {
+                                        side_to_return = Some(OrderSide::SELL);
+                                    } 
+                                    if !next_short_below_long && last_short_below_long {
+                                        side_to_return = Some(OrderSide::BUY);
                                     }
                                 }
-                            }
-                            None => {
-                                let mut borrowed_ref = self.state.short_below_long.borrow_mut();
-                                if f_val > s_val {
-                                    *borrowed_ref = Some(false);
-                                } else {
-                                    *borrowed_ref = Some(true);
+                                None => {
+                                    side_to_return = None;
                                 }
-                                None
                             }
                         }
+                        let mut borrowed_ref = self.state.short_below_long.borrow_mut();
+                        *borrowed_ref = Some(next_short_below_long);
+                        side_to_return
                     }
                     None => {
                         None
