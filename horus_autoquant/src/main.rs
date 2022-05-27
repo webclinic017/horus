@@ -3,7 +3,7 @@ mod reporters;
 use chrono::{Duration, Utc};
 
 use horus_backtesting::{run_backtest, BacktestResult};
-use horus_data_streams::receivers::{binance_market_data_receiver::BinanceMarketDataReceiver, data_receiver::DataReceiver};
+use horus_data_streams::receivers::{binance_market_data_receiver::BinanceMarketDataReceiver, data_receiver::DataReceiver, mock_market_data_receiver::MockMarketDataReceiver};
 use horus_finance::AggregatedMarketData;
 use horus_strategies::{Strategy, golden_cross};
 
@@ -50,7 +50,8 @@ fn find_best_strategy(market_data: &AggregatedMarketData) -> (Box<dyn Strategy>,
 fn main() {
     
     //1. Describe Market
-    let receiver = BinanceMarketDataReceiver::new(String::from("BNBETH"), String::from("5m"));
+    // let receiver = BinanceMarketDataReceiver::new(String::from("BNBETH"), String::from("5m"));
+    let receiver = MockMarketDataReceiver{};
     let end = Utc::now();
     let start = end.checked_sub_signed(Duration::days(1)).unwrap();
     let market_data: AggregatedMarketData = receiver.get_historical_data(start, end);
