@@ -7,5 +7,6 @@ members = [
     "horus_backtesting",
     "horus_strategies",
     "horus_autoquant",
-    "horus_agent"
+    "horus_agent",
+    "horus_terminal"
 ]

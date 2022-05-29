@@ -11,7 +11,7 @@ It contains
 
 ## TODOS
 - Improve testing/coverage
-- Takeover technical indicators form C# Horus project
+- Takeover technical indicators form C# Horus project + unit tests
 - Create eventlog for backtest results
 - Create new "StrategyDecision" struct that contains a homan readable text
 - Reporting for backtests (Terminal/Webapp/redirect to tradingview?)

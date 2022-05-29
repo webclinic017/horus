@@ -1,0 +1,9 @@
+[package]
+name = "horus_terminal"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+# EXTERNAL
+yew = "0.19"
