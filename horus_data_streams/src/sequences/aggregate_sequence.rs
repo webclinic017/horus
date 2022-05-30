@@ -153,70 +153,70 @@ mod momentum_tests {
     }
  }
 
-mod test_sequences {
-    use horus_finance::Aggregate;
-    use crate::sequences::sequence::Sequence;
+// mod test_sequences {
+//     use horus_finance::Aggregate;
+//     use crate::sequences::sequence::Sequence;
  
-    pub fn simulate_linear_falling(sequence: &Sequence::<Aggregate, 10>) {
+//     pub fn simulate_linear_falling(sequence: &Sequence::<Aggregate, 10>) {
 
-        for i in 0..9 {
+//         for i in 0..9 {
 
-            let aggregate = Aggregate {
-                open: 11. - i as f32,
-                close: 10. - i as f32
-            };
+//             let aggregate = Aggregate {
+//                 open: 11. - i as f32,
+//                 close: 10. - i as f32
+//             };
 
-            sequence.enqueue(&aggregate);
-        }
-    }
+//             sequence.enqueue(&aggregate);
+//         }
+//     }
 
-    pub fn simulate_linear_growing(sequence: &Sequence::<Aggregate, 10>) {
+//     pub fn simulate_linear_growing(sequence: &Sequence::<Aggregate, 10>) {
 
-        for i in 1..10 {
+//         for i in 1..10 {
 
-            let aggregate = Aggregate {
-                open: i as f32,
-                close: i as f32 + 1.
-            };
+//             let aggregate = Aggregate {
+//                 open: i as f32,
+//                 close: i as f32 + 1.
+//             };
 
-            sequence.enqueue(&aggregate);
-        }
-    }
+//             sequence.enqueue(&aggregate);
+//         }
+//     }
 
-    pub fn simulate_moving_market(sequence: &Sequence::<Aggregate, 10>) {
+//     pub fn simulate_moving_market(sequence: &Sequence::<Aggregate, 10>) {
 
-        for i in 1..10 {
+//         for i in 1..10 {
 
-            let mut open: f32 = 0.;
-            let mut close: f32 = 0.;
+//             let mut open: f32 = 0.;
+//             let mut close: f32 = 0.;
 
-            if i % 2 != 0 {
-                open = 6.;
-                close = 3.;
-            } else {
-                open = 3.;
-                close = 6.;
-            }
+//             if i % 2 != 0 {
+//                 open = 6.;
+//                 close = 3.;
+//             } else {
+//                 open = 3.;
+//                 close = 6.;
+//             }
 
-            let aggregate = Aggregate {
-                open,
-                close,
-            };
+//             let aggregate = Aggregate {
+//                 open,
+//                 close,
+//             };
 
-            sequence.enqueue(&aggregate);
-        }
-    }
+//             sequence.enqueue(&aggregate);
+//         }
+//     }
 
-    pub fn simulate_stable_market(sequence: &Sequence::<Aggregate, 10>) {
+//     pub fn simulate_stable_market(sequence: &Sequence::<Aggregate, 10>) {
 
-        for i in 1..10 {
+//         for i in 1..10 {
 
-            let aggregate = Aggregate {
-                open: 10.,
-                close: 10.,
-            };
+//             let aggregate = Aggregate {
+//                 open: 10.,
+//                 close: 10.,
+//             };
 
-            sequence.enqueue(&aggregate);
-        }
-    } 
-}
+//             sequence.enqueue(&aggregate);
+//         }
+//     } 
+// }
