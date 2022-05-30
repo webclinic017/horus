@@ -32,28 +32,40 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
             return None
         }
 
-        let start = current_size - SIZE;
-
-        let mut total: f32 = 0.0;
-
-        for index in start..current_size {
-
-            total += self.data.borrow().iter().nth(index.into()).unwrap().close;
-        }
-
-        Some(total / (SIZE as f32))
+        todo!()
     }
 
     pub fn get_rate_of_change(&self) -> Option<f32> {
-        todo!();
+        
+        let current_size: usize = self.data.borrow().len().try_into().unwrap();
+
+        if current_size < SIZE {
+            return None
+        }
+
+        todo!()
     }
 
     pub fn get_average_true_range(&self) -> Option<f32> {
-        todo!();
+
+        let current_size: usize = self.data.borrow().len().try_into().unwrap();
+
+        if current_size < SIZE {
+            return None
+        }
+
+        todo!()
     }
 
     pub fn get_momentum(&self) -> Option<f32> {
-        todo!();
+
+        let current_size: usize = self.data.borrow().len().try_into().unwrap();
+
+        if current_size < SIZE {
+            return None
+        }
+
+        todo!()
     }
 }
 
@@ -65,7 +77,7 @@ mod moving_average_tests {
     use crate::sequences::sequence::Sequence;
 
     #[test]
-    fn should_not_compute_moving_average_when_range_is_higher_then_length_of_sequence() {
+    fn should_not_compute_moving_average_when_sequence_is_not_ready() {
 
         // Arrange
         let seq = Sequence::<Aggregate, 10>::new();
@@ -76,64 +88,135 @@ mod moving_average_tests {
         // Assert
         assert_eq!(None, moving_average);
     }
+}
+
+#[cfg(test)]
+mod rate_of_change_tests {
+
+    use horus_finance::Aggregate;
+
+    use crate::sequences::sequence::Sequence;
 
     #[test]
-    fn should_compute_correct_moving_average_when_queue_is_partially_filled() {
-        
+    fn should_not_compute_rate_of_change_when_sequence_is_not_ready() {
+
         // Arrange
-        let mut seq = Sequence::<Aggregate, 10>::new();
-        fill_sequence(&mut seq);
+        let seq = Sequence::<Aggregate, 10>::new();
         
         // Act
-        let moving_average = seq.get_moving_average();
+        let rate_of_change = seq.get_rate_of_change();
 
         // Assert
-        assert_eq!(Some(10.0), moving_average);
+        assert_eq!(None, rate_of_change);
     }
+ }
+
+#[cfg(test)]
+mod average_true_range_tests {
+
+    use horus_finance::Aggregate;
+
+    use crate::sequences::sequence::Sequence;
 
     #[test]
-    fn should_compute_correct_moving_average_after_queue_is_dequeued() {
-        // Arrange
-        let mut seq = Sequence::<Aggregate, 10>::new();
-        fill_sequence(&mut seq);
-        let aggregate = Aggregate {
-            open: 10.0,
-            close: 30.0
-        };
-        seq.enqueue(&aggregate);
+    fn should_not_compute_average_true_range_when_sequence_is_not_ready() {
 
+        // Arrange
+        let seq = Sequence::<Aggregate, 10>::new();
+        
         // Act
-        let moving_average_5 = seq.get_moving_average();
-        let moving_average_2 = seq.get_moving_average();
+        let average_true_range = seq.get_average_true_range();
 
         // Assert
-        assert_eq!(Some(14.0), moving_average_5);
-        assert_eq!(Some(20.0), moving_average_2);
+        assert_eq!(None, average_true_range);
     }
+ }
 
-    fn fill_sequence(sequence: &mut Sequence::<Aggregate, 10>) {
+#[cfg(test)]
+mod momentum_tests {
 
-        for _ in 0..9{
+    use horus_finance::Aggregate;
+
+    use crate::sequences::sequence::Sequence;
+
+    #[test]
+    fn should_not_compute_momentum_when_sequence_is_not_ready() {
+
+        // Arrange
+        let seq = Sequence::<Aggregate, 10>::new();
+        
+        // Act
+        let momentum = seq.get_momentum();
+
+        // Assert
+        assert_eq!(None, momentum);
+    }
+ }
+
+mod test_sequences {
+    use horus_finance::Aggregate;
+    use crate::sequences::sequence::Sequence;
+ 
+    pub fn simulate_linear_falling(sequence: &Sequence::<Aggregate, 10>) {
+
+        for i in 0..9 {
 
             let aggregate = Aggregate {
-                open: 10.0,
-                close: 10.0
+                open: 11. - i as f32,
+                close: 10. - i as f32
             };
 
             sequence.enqueue(&aggregate);
         }
     }
-}
 
-#[cfg(test)]
-mod rate_of_change_tests { }
+    pub fn simulate_linear_growing(sequence: &Sequence::<Aggregate, 10>) {
 
-#[cfg(test)]
-mod average_true_range_tests { }
+        for i in 1..10 {
 
-#[cfg(test)]
-mod momentum_tests { }
+            let aggregate = Aggregate {
+                open: i as f32,
+                close: i as f32 + 1.
+            };
 
-mod fake_sequences { 
-    
+            sequence.enqueue(&aggregate);
+        }
+    }
+
+    pub fn simulate_moving_market(sequence: &Sequence::<Aggregate, 10>) {
+
+        for i in 1..10 {
+
+            let mut open: f32 = 0.;
+            let mut close: f32 = 0.;
+
+            if i % 2 != 0 {
+                open = 6.;
+                close = 3.;
+            } else {
+                open = 3.;
+                close = 6.;
+            }
+
+            let aggregate = Aggregate {
+                open,
+                close,
+            };
+
+            sequence.enqueue(&aggregate);
+        }
+    }
+
+    pub fn simulate_stable_market(sequence: &Sequence::<Aggregate, 10>) {
+
+        for i in 1..10 {
+
+            let aggregate = Aggregate {
+                open: 10.,
+                close: 10.,
+            };
+
+            sequence.enqueue(&aggregate);
+        }
+    } 
 }
