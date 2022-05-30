@@ -7,3 +7,4 @@ edition = "2021"
 
 # EXTERNAL
 yew = "0.19"
+wasm-bindgen = "0.2.80"

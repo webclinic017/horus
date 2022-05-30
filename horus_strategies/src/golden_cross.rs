@@ -8,37 +8,33 @@ struct GoldenCrossStrategyState {
     short_below_long: RefCell<Option<bool>>
 }
 
-pub struct GoldenCrossStrategy {
-    pub first_sma: u16,
-    pub second_sma: u16,
-    first_sma_seq: Sequence<Aggregate>,
-    second_sma_seq: Sequence<Aggregate>,
+pub struct GoldenCrossStrategy<const SHORT_MA: usize, const LONG_MA: usize> {
+    short_moving_average_seq: Sequence<Aggregate, SHORT_MA>,
+    long_moving_average_seq: Sequence<Aggregate, LONG_MA>,
     state: GoldenCrossStrategyState
 }
 
-impl GoldenCrossStrategy {
-    fn new(shorter: u16, longer: u16) -> GoldenCrossStrategy {
+impl<const SHORT_MA: usize, const LONG_MA: usize> GoldenCrossStrategy<SHORT_MA, LONG_MA> {
+    fn new() -> GoldenCrossStrategy<SHORT_MA, LONG_MA> {
         GoldenCrossStrategy { 
-            first_sma: shorter, 
-            second_sma: longer,
-            first_sma_seq: Sequence::<Aggregate>::new(),
-            second_sma_seq: Sequence::<Aggregate>::new(),
+            short_moving_average_seq: Sequence::<Aggregate, SHORT_MA>::new(),
+            long_moving_average_seq: Sequence::<Aggregate, LONG_MA>::new(),
             state: GoldenCrossStrategyState { short_below_long: RefCell::new(None) }
         }
     }
 }
 
-impl Strategy for GoldenCrossStrategy {
+impl<const SHORT_MA: usize, const LONG_MA: usize> Strategy for GoldenCrossStrategy<SHORT_MA, LONG_MA> {
     fn next(&self, aggregate: &Aggregate) -> Option<OrderSide> {
-        self.first_sma_seq.enqueue(aggregate);
-        self.second_sma_seq.enqueue(aggregate);
+        self.short_moving_average_seq.enqueue(aggregate);
+        self.long_moving_average_seq.enqueue(aggregate);
 
-        let first_sma_value = self.first_sma_seq.get_sma(&self.first_sma);
-        let second_sma_value = self.first_sma_seq.get_sma(&self.second_sma);
+        let first_moving_average_value = self.short_moving_average_seq.get_moving_average();
+        let second_moving_average_value = self.long_moving_average_seq.get_moving_average();
 
-        match first_sma_value {
+        match first_moving_average_value {
             Some(f_val) => {
-                match second_sma_value {
+                match second_moving_average_value {
                     Some(s_val) => {
                         let next_short_below_long: bool = f_val < s_val;
                         let mut side_to_return: Option<OrderSide> = None;
@@ -77,15 +73,15 @@ impl Strategy for GoldenCrossStrategy {
         "GOLDEN_CROSS"
     }
     fn print_values_to_console(&self) {
-        println!("First SMA: {}", self.first_sma);
-        println!("Second SMA: {}", self.second_sma);
+        println!("Short MA: {}", self.short_moving_average_seq.get_length());
+        println!("Long MA: {}", self.long_moving_average_seq.get_length());
     }
 }
 
 pub fn generate_strategy_matrix() -> Vec<Box<dyn Strategy>> {
     
-    let strategy_01 = GoldenCrossStrategy::new(50, 200);
-    let strategy_02 = GoldenCrossStrategy::new(20, 60);
+    let strategy_01 = GoldenCrossStrategy::<50, 200>::new();
+    let strategy_02 = GoldenCrossStrategy::<20, 60>::new();
     let mut matrix: Vec<Box<dyn Strategy>> = Vec::<Box<dyn Strategy>>::new();
     matrix.push(Box::new(strategy_01));
     matrix.push(Box::new(strategy_02));

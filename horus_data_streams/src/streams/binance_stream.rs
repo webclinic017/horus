@@ -2,13 +2,13 @@ use std::sync::{Arc, Mutex};
 use horus_finance::Aggregate;
 use crate::{receivers::binance_market_data_receiver::BinanceMarketDataReceiver, sequences::sequence::Sequence};
 
-pub struct BinanceStream<'a> {
-    pub data_sequence: &'a Arc<Mutex<Sequence<Aggregate>>>,
+pub struct BinanceStream<'a, const SIZE: usize> {
+    pub data_sequence: &'a Arc<Mutex<Sequence<Aggregate, SIZE>>>,
     pub receiver: BinanceMarketDataReceiver,
     pub strategy: Option<&'a dyn Fn()>,
 }
 
-impl<'a> BinanceStream<'a> {
+impl<'a, const SIZE: usize> BinanceStream<'a, SIZE> {
 
     pub fn connect(&self) {
         // let on_data_receive = |nd: Aggregate| {

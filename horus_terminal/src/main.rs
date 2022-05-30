@@ -41,6 +41,10 @@ impl Component for Model {
     }
 }
 
+impl Model {
+    
+}
+
 fn main() {
     yew::start_app::<Model>();
 }
