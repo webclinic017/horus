@@ -1,32 +1,40 @@
 use yew::prelude::*;
-use gloo::console::{self, Timer};
-use gloo::timers::callback::{Interval, Timeout};
+// use gloo::console::{self, Timer};
+use gloo::timers::callback::Interval;
 
 struct Position {
     agent_id: &'static str,
-    // exchange_name: CompactString,
-    // quote_name: CompactString,
-    // currency: CompactString,
-    // date_of_buy: CompactString,
-    // date_of_sell: CompactString,
-    // buy_price: f32,
-    // sell_price: f32,
-    // amount: f32,
+    exchange_name: &'static str,
+    quote_name: &'static str,
+    currency: &'static str,
+    date_of_buy: &'static str,
+    date_of_sell: &'static str,
+    buy_price: f32,
+    sell_price: f32,
+    amount: f32,
 }
 
 impl Clone for Position {
     fn clone(&self) -> Self {
-        Self { agent_id: self.agent_id.clone() }
+        Self { 
+            agent_id: self.agent_id.clone(), 
+            exchange_name: self.exchange_name.clone(), 
+            quote_name: self.quote_name.clone(), 
+            currency: self.currency.clone(), 
+            date_of_buy: self.date_of_buy.clone(), 
+            date_of_sell: self.date_of_sell.clone(), 
+            buy_price: self.buy_price.clone(), 
+            sell_price: self.sell_price.clone(), 
+            amount: self.amount.clone() 
+        }
     }
 }
 
-impl Copy for Position {
-    
-}
+impl Copy for Position { }
 
 struct PositionTable {
-    positions: [Position; 2],
-    publish_task: Interval
+    positions: Vec<Position>,
+    _publish_task: Interval
 }
 
 impl Component for PositionTable {
@@ -40,48 +48,51 @@ impl Component for PositionTable {
 
             let fake_position = Position {
                 agent_id: "#A337",
-                // exchange_name: CompactString::from("BINANCE"),
-                // quote_name: CompactString::from("BTC"),
-                // currency: CompactString::from("EUR"),
-                // date_of_buy: CompactString::from("DROELF"),
-                // date_of_sell: CompactString::from("DROELF"),
-                // buy_price: 13.98,
-                // sell_price: 29.45,
-                // amount: 12.
+                exchange_name: "BINANCE",
+                quote_name: "BTC",
+                currency: "EUR",
+                date_of_buy: "DROELF",
+                date_of_sell: "DROELF",
+                buy_price: 13.98,
+                sell_price: 29.45,
+                amount: 12.
             };
-            Interval::new(1000, move || link.send_message(fake_position))
+            Interval::new(1000, move || {
+                link.send_message(fake_position);
+            })
         };
 
         Self {
-            positions: [
+            positions: vec![
                 Position {
                     agent_id: "#A337",
-                    // exchange_name: CompactString::from("BINANCE"),
-                    // quote_name: CompactString::from("BTC"),
-                    // currency: CompactString::from("EUR"),
-                    // date_of_buy: CompactString::from("DROELF"),
-                    // date_of_sell: CompactString::from("DROELF"),
-                    // buy_price: 13.98,
-                    // sell_price: 29.45,
-                    // amount: 12.
+                    exchange_name: "BINANCE",
+                    quote_name: "BTC",
+                    currency: "EUR",
+                    date_of_buy: "DROELF",
+                    date_of_sell: "DROELF",
+                    buy_price: 13.98,
+                    sell_price: 29.45,
+                    amount: 12.
                 },
                 Position {
                     agent_id: "#A337",
-                    // exchange_name: CompactString::from("BINANCE"),
-                    // quote_name: CompactString::from("IOTA"),
-                    // currency: CompactString::from("EUR"),
-                    // date_of_buy: CompactString::from("DROELF"),
-                    // date_of_sell: CompactString::from("DROELF"),
-                    // buy_price: 53.98,
-                    // sell_price: 59.45,
-                    // amount: 16.
+                    exchange_name: "BINANCE",
+                    quote_name: "IOTA",
+                    currency: "EUR",
+                    date_of_buy: "DROELF",
+                    date_of_sell: "DROELF",
+                    buy_price: 53.98,
+                    sell_price: 59.45,
+                    amount: 16.
                 }
             ],
-            publish_task: publish_interval,
+            _publish_task: publish_interval,
         }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        self.positions.push(msg);
         true
     }
 
@@ -103,13 +114,13 @@ impl Component for PositionTable {
                   html!{
                     <tr>
                       <td>{ pos.agent_id }</td>
-                    //   <td>{ pos.exchange_name }</td>
-                    //   <td>{ pos.agent_id }</td>
-                    //   <td>{ pos.exchange_name }</td>
-                    //   <td>{ pos.agent_id }</td>
-                    //   <td>{ pos.exchange_name }</td>
-                    //   <td>{ pos.agent_id }</td>
-                    //   <td>{ pos.exchange_name }</td>
+                      <td>{ pos.exchange_name }</td>
+                      <td>{ pos.quote_name }</td>
+                      <td>{ pos.buy_price }</td>
+                      <td>{ pos.sell_price }</td>
+                      <td>{ pos.sell_price - pos.buy_price }</td>
+                      <td>{ "13%" }</td>
+                      <td>{ "5 seconds" }</td>
                     </tr>
                   }
                 }).collect::<Html>()
