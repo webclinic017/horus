@@ -4,14 +4,12 @@ use crate::Strategy;
 use horus_data_streams::sequences::sequence::Sequence;
 use horus_finance::{Aggregate, OrderSide};
 
-struct GoldenCrossStrategyState {
-    short_below_long: RefCell<Option<bool>>
-}
-
 pub struct GoldenCrossStrategy<const SHORT_MA: usize, const LONG_MA: usize> {
     short_moving_average_seq: Sequence<Aggregate, SHORT_MA>,
     long_moving_average_seq: Sequence<Aggregate, LONG_MA>,
-    state: GoldenCrossStrategyState
+    short_moving_avg_sum: RefCell<f32>,
+    long_moving_avg_sum: RefCell<f32>,
+    short_below_long: RefCell<Option<bool>>
 }
 
 impl<const SHORT_MA: usize, const LONG_MA: usize> GoldenCrossStrategy<SHORT_MA, LONG_MA> {
@@ -19,18 +17,20 @@ impl<const SHORT_MA: usize, const LONG_MA: usize> GoldenCrossStrategy<SHORT_MA, 
         GoldenCrossStrategy { 
             short_moving_average_seq: Sequence::<Aggregate, SHORT_MA>::new(),
             long_moving_average_seq: Sequence::<Aggregate, LONG_MA>::new(),
-            state: GoldenCrossStrategyState { short_below_long: RefCell::new(None) }
+            short_moving_avg_sum: RefCell::new(0.),
+            long_moving_avg_sum: RefCell::new(0.),
+            short_below_long: RefCell::new(None)
         }
     }
 }
 
 impl<const SHORT_MA: usize, const LONG_MA: usize> Strategy for GoldenCrossStrategy<SHORT_MA, LONG_MA> {
     fn next(&self, aggregate: &Aggregate) -> Option<OrderSide> {
-        self.short_moving_average_seq.enqueue(aggregate);
-        self.long_moving_average_seq.enqueue(aggregate);
+        let mut short_sum_borrowed = self.short_moving_avg_sum.borrow_mut();
+        let mut long_sum_borrowed = self.long_moving_avg_sum.borrow_mut();
 
-        let first_moving_average_value = self.short_moving_average_seq.get_moving_average();
-        let second_moving_average_value = self.long_moving_average_seq.get_moving_average();
+        let first_moving_average_value = self.short_moving_average_seq.enqueue_for_moving_average(aggregate, &mut short_sum_borrowed);
+        let second_moving_average_value = self.long_moving_average_seq.enqueue_for_moving_average(aggregate, &mut long_sum_borrowed);
 
         match first_moving_average_value {
             Some(f_val) => {
@@ -39,7 +39,7 @@ impl<const SHORT_MA: usize, const LONG_MA: usize> Strategy for GoldenCrossStrate
                         let next_short_below_long: bool = f_val < s_val;
                         let mut side_to_return: Option<OrderSide> = None;
                         {
-                            let tmp_ref = self.state.short_below_long.borrow();
+                            let tmp_ref = self.short_below_long.borrow();
                             match *tmp_ref {
                                 Some(s) => { 
                                     let last_short_below_long = s;
@@ -55,7 +55,7 @@ impl<const SHORT_MA: usize, const LONG_MA: usize> Strategy for GoldenCrossStrate
                                 }
                             }
                         }
-                        let mut borrowed_ref = self.state.short_below_long.borrow_mut();
+                        let mut borrowed_ref = self.short_below_long.borrow_mut();
                         *borrowed_ref = Some(next_short_below_long);
                         side_to_return
                     }

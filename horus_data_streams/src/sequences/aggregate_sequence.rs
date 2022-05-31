@@ -12,61 +12,78 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
         }
     }
 
-    pub fn enqueue(&self, next_aggregate: &Aggregate) {
+    pub fn enqueue(&self, aggregate: &Aggregate) -> Option<Aggregate> {
 
+        let mut dequeued: Option<Aggregate> = None;
         if self.data.borrow().is_full() {
-            self.data.borrow_mut().dequeue().unwrap();
+            dequeued = self.data.borrow_mut().dequeue();
         }
 
-        self.data.borrow_mut().enqueue(*next_aggregate).unwrap();
-        // enqueue
-        // update moving avg
-        // update ...
+        self.data.borrow_mut().enqueue(*aggregate).unwrap();
+
+        dequeued
     }
 
-    pub fn get_moving_average(&self) -> Option<f32> {
+    pub fn enqueue_for_moving_average(&self, aggregate: &Aggregate, sequence_sum: &mut f32) -> Option<f32> {
+
+        let mut is_ready = true;
 
         let current_size: usize = self.data.borrow().len().try_into().unwrap();
 
         if current_size < SIZE {
-            return None
+            is_ready = false;
         }
 
-        todo!()
+        let dequeued = self.enqueue(aggregate);
+
+        *sequence_sum = *sequence_sum + aggregate.close;
+
+        match dequeued {
+            None => {}
+            Some(removed_agg) => {
+                *sequence_sum = *sequence_sum - removed_agg.close;
+            }
+        }
+
+        if is_ready {
+            Some(*sequence_sum / SIZE as f32)
+        } else {
+            None
+        }
     }
 
-    pub fn get_rate_of_change(&self) -> Option<f32> {
+    // pub fn enqueue_for_rate_of_change(&self, aggregate: &Aggregate) -> Option<f32> {
         
-        let current_size: usize = self.data.borrow().len().try_into().unwrap();
+    //     // let current_size: usize = self.data.borrow().len().try_into().unwrap();
 
-        if current_size < SIZE {
-            return None
-        }
+    //     // if current_size < SIZE {
+    //     //     return None
+    //     // }
 
-        todo!()
-    }
+    //     todo!()
+    // }
 
-    pub fn get_average_true_range(&self) -> Option<f32> {
+    // pub fn enqueue_for_average_true_range(&self, aggregate: &Aggregate) -> Option<f32> {
 
-        let current_size: usize = self.data.borrow().len().try_into().unwrap();
+    //     let current_size: usize = self.data.borrow().len().try_into().unwrap();
 
-        if current_size < SIZE {
-            return None
-        }
+    //     if current_size < SIZE {
+    //         return None
+    //     }
 
-        todo!()
-    }
+    //     todo!()
+    // }
 
-    pub fn get_momentum(&self) -> Option<f32> {
+    // pub fn enqueue_for_momentum(&self, aggregate: &Aggregate) -> Option<f32> {
 
-        let current_size: usize = self.data.borrow().len().try_into().unwrap();
+    //     let current_size: usize = self.data.borrow().len().try_into().unwrap();
 
-        if current_size < SIZE {
-            return None
-        }
+    //     if current_size < SIZE {
+    //         return None
+    //     }
 
-        todo!()
-    }
+    //     todo!()
+    // }
 }
 
 #[cfg(test)]
@@ -74,149 +91,199 @@ mod moving_average_tests {
 
     use horus_finance::Aggregate;
 
-    use crate::sequences::sequence::Sequence;
+    use crate::sequences::{sequence::Sequence, aggregate_sequence::test_sequences::{create_linear_falling_market, create_linear_growing_market, create_moving_market}};
 
     #[test]
-    fn should_not_compute_moving_average_when_sequence_is_not_ready() {
+    fn should_compute_correct_moving_average_in_stable_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 10>::new();
+        let seq = Sequence::<Aggregate, 6>::new();
+        let market = create_linear_falling_market();
+        let mut ma_sum: f32 = 0.;
+
+        let mut moving_average: Option<f32> = None;
         
         // Act
-        let moving_average = seq.get_moving_average();
+        for datum in market {
+
+            moving_average = seq.enqueue_for_moving_average(&datum, &mut ma_sum);
+        }
 
         // Assert
-        assert_eq!(None, moving_average);
+        assert_eq!(Some(10.), moving_average);
+    }
+
+    #[test]
+    fn should_compute_correct_moving_average_in_growing_market() {
+
+        // Arrange
+        let seq = Sequence::<Aggregate, 4>::new();
+        let market = create_linear_growing_market();
+        let mut ma_sum: f32 = 0.;
+
+        let mut moving_average: Option<f32> = None;
+        
+        // Act
+        for datum in market {
+
+            moving_average = seq.enqueue_for_moving_average(&datum, &mut ma_sum);
+        }
+
+        // Assert
+        assert_eq!(Some(9.5), moving_average);
+    }
+
+    #[test]
+    fn should_compute_correct_moving_average_in_moving_market() {
+
+        // Arrange
+        let seq = Sequence::<Aggregate, 4>::new();
+        let market = create_moving_market();
+        let mut ma_sum: f32 = 0.;
+
+        let mut moving_average: Option<f32> = None;
+        
+        // Act
+        for datum in market {
+
+            moving_average = seq.enqueue_for_moving_average(&datum, &mut ma_sum);
+        }
+
+        // Assert
+        assert_eq!(Some(4.5), moving_average);
     }
 }
 
-#[cfg(test)]
-mod rate_of_change_tests {
+// #[cfg(test)]
+// mod rate_of_change_tests {
 
-    use horus_finance::Aggregate;
-
-    use crate::sequences::sequence::Sequence;
-
-    #[test]
-    fn should_not_compute_rate_of_change_when_sequence_is_not_ready() {
-
-        // Arrange
-        let seq = Sequence::<Aggregate, 10>::new();
-        
-        // Act
-        let rate_of_change = seq.get_rate_of_change();
-
-        // Assert
-        assert_eq!(None, rate_of_change);
-    }
- }
-
-#[cfg(test)]
-mod average_true_range_tests {
-
-    use horus_finance::Aggregate;
-
-    use crate::sequences::sequence::Sequence;
-
-    #[test]
-    fn should_not_compute_average_true_range_when_sequence_is_not_ready() {
-
-        // Arrange
-        let seq = Sequence::<Aggregate, 10>::new();
-        
-        // Act
-        let average_true_range = seq.get_average_true_range();
-
-        // Assert
-        assert_eq!(None, average_true_range);
-    }
- }
-
-#[cfg(test)]
-mod momentum_tests {
-
-    use horus_finance::Aggregate;
-
-    use crate::sequences::sequence::Sequence;
-
-    #[test]
-    fn should_not_compute_momentum_when_sequence_is_not_ready() {
-
-        // Arrange
-        let seq = Sequence::<Aggregate, 10>::new();
-        
-        // Act
-        let momentum = seq.get_momentum();
-
-        // Assert
-        assert_eq!(None, momentum);
-    }
- }
-
-// mod test_sequences {
 //     use horus_finance::Aggregate;
+
 //     use crate::sequences::sequence::Sequence;
+//  }
+
+// #[cfg(test)]
+// mod average_true_range_tests {
+
+//     use horus_finance::Aggregate;
+
+//     use crate::sequences::sequence::Sequence;
+
+//     #[test]
+//     fn should_not_compute_average_true_range_when_sequence_is_not_ready() {
+
+//         // Arrange
+//         let seq = Sequence::<Aggregate, 10>::new();
+        
+//         // Act
+//         let average_true_range = seq.get_average_true_range();
+
+//         // Assert
+//         assert_eq!(None, average_true_range);
+//     }
+//  }
+
+// #[cfg(test)]
+// mod momentum_tests {
+
+//     use horus_finance::Aggregate;
+
+//     use crate::sequences::sequence::Sequence;
+
+//     #[test]
+//     fn should_not_compute_momentum_when_sequence_is_not_ready() {
+
+//         // Arrange
+//         let seq = Sequence::<Aggregate, 10>::new();
+        
+//         // Act
+//         let momentum = seq.get_momentum();
+
+//         // Assert
+//         assert_eq!(None, momentum);
+//     }
+//  }
+
+ #[cfg(test)]
+mod test_sequences {
+    use horus_finance::Aggregate;
  
-//     pub fn simulate_linear_falling(sequence: &Sequence::<Aggregate, 10>) {
+    pub fn create_linear_falling_market() -> Vec<Aggregate> {
 
-//         for i in 0..9 {
+        let mut aggregates: Vec<Aggregate> = Vec::new();
 
-//             let aggregate = Aggregate {
-//                 open: 11. - i as f32,
-//                 close: 10. - i as f32
-//             };
+        for i in 0..9 {
 
-//             sequence.enqueue(&aggregate);
-//         }
-//     }
+            let aggregate = Aggregate {
+                open: 11. - i as f32,
+                close: 10. - i as f32
+            };
 
-//     pub fn simulate_linear_growing(sequence: &Sequence::<Aggregate, 10>) {
+            aggregates.push(aggregate);
+        }
 
-//         for i in 1..10 {
+        aggregates
+    }
 
-//             let aggregate = Aggregate {
-//                 open: i as f32,
-//                 close: i as f32 + 1.
-//             };
+    pub fn create_linear_growing_market() -> Vec<Aggregate> {
 
-//             sequence.enqueue(&aggregate);
-//         }
-//     }
+        let mut aggregates: Vec<Aggregate> = Vec::new();
 
-//     pub fn simulate_moving_market(sequence: &Sequence::<Aggregate, 10>) {
+        for i in 0..10 {
 
-//         for i in 1..10 {
+            let aggregate = Aggregate {
+                open: i as f32,
+                close: i as f32 + 1.
+            };
 
-//             let mut open: f32 = 0.;
-//             let mut close: f32 = 0.;
+            aggregates.push(aggregate);
+        }
 
-//             if i % 2 != 0 {
-//                 open = 6.;
-//                 close = 3.;
-//             } else {
-//                 open = 3.;
-//                 close = 6.;
-//             }
+        aggregates
+    }
 
-//             let aggregate = Aggregate {
-//                 open,
-//                 close,
-//             };
+    pub fn create_moving_market() -> Vec<Aggregate> {
 
-//             sequence.enqueue(&aggregate);
-//         }
-//     }
+        let mut aggregates: Vec<Aggregate> = Vec::new();
 
-//     pub fn simulate_stable_market(sequence: &Sequence::<Aggregate, 10>) {
+        for i in 1..10 {
 
-//         for i in 1..10 {
+            let open: f32;
+            let close: f32;
 
-//             let aggregate = Aggregate {
-//                 open: 10.,
-//                 close: 10.,
-//             };
+            if i % 2 != 0 {
+                open = 6.;
+                close = 3.;
+            } else {
+                open = 3.;
+                close = 6.;
+            }
 
-//             sequence.enqueue(&aggregate);
-//         }
-//     } 
-// }
+            let aggregate = Aggregate {
+                open,
+                close,
+            };
+
+            aggregates.push(aggregate);
+        }
+
+        aggregates
+    }
+
+    // pub fn create_stable_market() -> Vec<Aggregate> {
+
+    //     let mut aggregates: Vec<Aggregate> = Vec::new();
+
+    //     for _ in 1..10 {
+
+    //         let aggregate = Aggregate {
+    //             open: 10.,
+    //             close: 10.,
+    //         };
+
+    //         aggregates.push(aggregate);
+    //     }
+
+    //     aggregates
+    // } 
+}
