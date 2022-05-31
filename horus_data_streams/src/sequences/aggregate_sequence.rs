@@ -26,12 +26,16 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
 
     pub fn enqueue_for_moving_average(&self, aggregate: &Aggregate, sequence_sum: &mut f32) -> Option<f32> {
 
-        let mut is_ready = true;
+        let is_ready;
 
         let current_size: usize = self.data.borrow().len().try_into().unwrap();
 
-        if current_size < SIZE {
+        // let gg = SIZE;
+
+        if current_size < SIZE - 1 {
             is_ready = false;
+        } else {
+            is_ready = true;
         }
 
         let dequeued = self.enqueue(aggregate);
@@ -46,7 +50,7 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
         }
 
         if is_ready {
-            Some(*sequence_sum / SIZE as f32)
+            Some(*sequence_sum / (SIZE - 1) as f32)
         } else {
             None
         }
@@ -91,14 +95,14 @@ mod moving_average_tests {
 
     use horus_finance::Aggregate;
 
-    use crate::sequences::{sequence::Sequence, aggregate_sequence::test_sequences::{create_linear_falling_market, create_linear_growing_market, create_moving_market}};
+    use crate::sequences::{sequence::Sequence, aggregate_sequence::test_sequences::{create_linear_growing_market, create_moving_market, create_stable_market}};
 
     #[test]
     fn should_compute_correct_moving_average_in_stable_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 6>::new();
-        let market = create_linear_falling_market();
+        let seq = Sequence::<Aggregate, 7>::new();
+        let market = create_stable_market();
         let mut ma_sum: f32 = 0.;
 
         let mut moving_average: Option<f32> = None;
@@ -117,7 +121,7 @@ mod moving_average_tests {
     fn should_compute_correct_moving_average_in_growing_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 4>::new();
+        let seq = Sequence::<Aggregate, 5>::new();
         let market = create_linear_growing_market();
         let mut ma_sum: f32 = 0.;
 
@@ -130,14 +134,14 @@ mod moving_average_tests {
         }
 
         // Assert
-        assert_eq!(Some(9.5), moving_average);
+        assert_eq!(Some(8.5), moving_average);
     }
 
     #[test]
     fn should_compute_correct_moving_average_in_moving_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 4>::new();
+        let seq = Sequence::<Aggregate, 5>::new();
         let market = create_moving_market();
         let mut ma_sum: f32 = 0.;
 
@@ -208,22 +212,22 @@ mod moving_average_tests {
 mod test_sequences {
     use horus_finance::Aggregate;
  
-    pub fn create_linear_falling_market() -> Vec<Aggregate> {
+    // pub fn create_linear_falling_market() -> Vec<Aggregate> {
 
-        let mut aggregates: Vec<Aggregate> = Vec::new();
+    //     let mut aggregates: Vec<Aggregate> = Vec::new();
 
-        for i in 0..9 {
+    //     for i in 0..9 {
 
-            let aggregate = Aggregate {
-                open: 11. - i as f32,
-                close: 10. - i as f32
-            };
+    //         let aggregate = Aggregate {
+    //             open: 11. - i as f32,
+    //             close: 10. - i as f32
+    //         };
 
-            aggregates.push(aggregate);
-        }
+    //         aggregates.push(aggregate);
+    //     }
 
-        aggregates
-    }
+    //     aggregates
+    // }
 
     pub fn create_linear_growing_market() -> Vec<Aggregate> {
 
@@ -270,20 +274,20 @@ mod test_sequences {
         aggregates
     }
 
-    // pub fn create_stable_market() -> Vec<Aggregate> {
+    pub fn create_stable_market() -> Vec<Aggregate> {
 
-    //     let mut aggregates: Vec<Aggregate> = Vec::new();
+        let mut aggregates: Vec<Aggregate> = Vec::new();
 
-    //     for _ in 1..10 {
+        for _ in 1..10 {
 
-    //         let aggregate = Aggregate {
-    //             open: 10.,
-    //             close: 10.,
-    //         };
+            let aggregate = Aggregate {
+                open: 10.,
+                close: 10.,
+            };
 
-    //         aggregates.push(aggregate);
-    //     }
+            aggregates.push(aggregate);
+        }
 
-    //     aggregates
-    // } 
+        aggregates
+    } 
 }
