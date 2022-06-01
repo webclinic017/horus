@@ -29,6 +29,7 @@ your strategy are compiled to binary programs that are tuned for high performanc
 - SPIKE: Make use of incode documentation
 - Apply performance tips from the rust perf book to the entire codebase
 - Make the whole project representable
+- Create tutorials for how to create a strategy, how to backtest a strategy and how to run a strategy
 
 ### Autoquant
 - Consider the case that no strategy has been found
