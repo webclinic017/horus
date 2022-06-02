@@ -1,15 +1,21 @@
-use horus_finance::{Aggregate, AggregatedMarketData};
+use horus_finance::Aggregate;
 
 use super::data_receiver::DataReceiver;
 
-pub struct MockMarketDataReceiver {}
+pub struct MockMarketDataReceiver<'a, ONDATARECEIVE: Fn(Aggregate)> {
+    on_data_receive: &'a ONDATARECEIVE
+}
 
-impl DataReceiver for MockMarketDataReceiver {
-    fn start_listening(&self, _on_data_receive: &dyn Fn()) {
+impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for MockMarketDataReceiver<'a, ONDATARECEIVE> {
+    fn start_listening(&self) {
         todo!()
     }
 
-    fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> horus_finance::AggregatedMarketData {
+    fn inject(&self, datum: Aggregate) {
+        let _ = &(self.on_data_receive)(datum);
+    }
+
+    fn get_historical_data(&self, _start: chrono::DateTime<chrono::Utc>, _end: chrono::DateTime<chrono::Utc>) -> Vec<Aggregate> {
         let mut mock_data = Vec::<Aggregate>::new();
 
         mock_data.push(Aggregate {
@@ -21,13 +27,6 @@ impl DataReceiver for MockMarketDataReceiver {
             close: 3.
         });
 
-        AggregatedMarketData {
-            aggregates: mock_data,
-            aggregation_length: String::from("undefined"),
-            exchange_name: String::from("MOCK_EXCHANGE"),
-            market_name: String::from("MOCK_MARKET"),
-            start_time: start,
-            end_time: end
-        }
+        mock_data
     }
 }

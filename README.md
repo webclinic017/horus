@@ -19,7 +19,11 @@ to find the best fitting parameters for a past market period.
 
 ### Where is this project different from other algorithmic trading platforms
 This project has a huge focus on performance and reliability. The trading agents that contain
-your strategy are compiled to binary programs that are tuned for high performance by low level techniques (minimizing heap usage, avoiding vtables, reducing CPU instructions, etc...)
+your strategy are compiled to binary programs that are tuned for high performance by low level techniques like 
+- minimizing heap usage
+- avoiding vtables
+- reducing CPU instructions
+- avoiding POSIX sockets via kernel-bypass networking
 
 
 ## TODOS

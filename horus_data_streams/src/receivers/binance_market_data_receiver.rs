@@ -1,38 +1,40 @@
 use std::sync::atomic::AtomicBool;
 
-use horus_finance::{Aggregate, AggregatedMarketData};
+use horus_finance::Aggregate;
 use binance::{websockets::*, market::Market, api::Binance};
 
 use super::data_receiver::DataReceiver;
 
-pub struct BinanceMarketDataReceiver {
+pub struct BinanceMarketDataReceiver<'a, ONDATARECEIVE: Fn(Aggregate)> {
     market: Market,
     symbol: String,
-    interval: String
+    interval: String,
+    on_data_receive: &'a ONDATARECEIVE
 }
 
-impl BinanceMarketDataReceiver {
-    pub fn new(symbol: String, interval: String) -> BinanceMarketDataReceiver {
+impl<'a, ONDATARECEIVE: Fn(Aggregate)> BinanceMarketDataReceiver<'a, ONDATARECEIVE> {
+    pub fn new(symbol: String, interval: String, on_data_receive: &'a ONDATARECEIVE) -> BinanceMarketDataReceiver<ONDATARECEIVE> {
         BinanceMarketDataReceiver {
             market: Binance::new(None, None),
             symbol,
-            interval
+            interval,
+            on_data_receive
         }
     }
 }
 
-impl DataReceiver for BinanceMarketDataReceiver {
-    fn start_listening(&self, on_data_receive: &dyn Fn()) {
+impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for BinanceMarketDataReceiver<'a, ONDATARECEIVE> {
+    fn start_listening(&self) {
             let keep_running = AtomicBool::new(true);
             let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
                 match event {
-                    WebsocketEvent::Kline(_) => { //kline_event) => {
-                        // let new_aggregate = Aggregate {
-                        //     open: kline_event.kline.open.parse::<f32>().unwrap(),
-                        //     close: kline_event.kline.close.parse::<f32>().unwrap()
-                        // };
-                        // println!("Received binance data");
-                        on_data_receive();
+                    WebsocketEvent::Kline(kline_event) => {
+                        let new_aggregate = Aggregate {
+                            open: kline_event.kline.open.parse::<f32>().unwrap(),
+                            close: kline_event.kline.close.parse::<f32>().unwrap()
+                        };
+                        println!("Received binance data");
+                        let _ = &(self.on_data_receive)(new_aggregate);
                     },
                     _ => (),
                 };
@@ -44,7 +46,11 @@ impl DataReceiver for BinanceMarketDataReceiver {
         web_socket.event_loop(&keep_running).unwrap();
     }
 
-    fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> AggregatedMarketData {
+    fn inject(&self, aggregate: Aggregate) {
+        let _ = &(self.on_data_receive)(aggregate);
+    }
+
+    fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> Vec<Aggregate> {
 
         let start_time = u64::try_from(start.timestamp_millis()).unwrap();
         let end_time = u64::try_from(end.timestamp_millis()).unwrap();
@@ -60,14 +66,7 @@ impl DataReceiver for BinanceMarketDataReceiver {
                             };
                             formatted.push(aggregate);
                         }
-                        AggregatedMarketData {
-                            aggregates: formatted,
-                            exchange_name: String::from("BINANCE"),
-                            market_name: String::from(&self.symbol),
-                            aggregation_length: String::from(&self.interval),
-                            start_time: start,
-                            end_time: end
-                        }
+                        formatted
                     }
                 }
             },

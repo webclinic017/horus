@@ -33,10 +33,10 @@ pub struct AggregatedMarketData {
 /// The type of the order.
 #[derive(Debug)]
 #[derive(PartialEq)]
-pub enum OrderSide {
-    SELL,
-    HOLD,
-    BUY
+pub enum MarketPosition {
+    SHORT,
+    NEUTRAL,
+    LONG
 }
 
 pub struct Position {
@@ -44,9 +44,10 @@ pub struct Position {
 }
 
 pub struct Order {
+    pub exchange_id: String,
     pub instrument_symbol: String,
-    pub side: OrderSide,
+    pub side: MarketPosition,
     pub quantity: f32,
-    pub price: f32,
-    pub expiration_date: String
+    pub price: Option<f32>,
+    pub expiration_date: Option<String>
 }

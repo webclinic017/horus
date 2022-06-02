@@ -1,32 +1,32 @@
-use std::{collections::HashMap, panic};
-use horus_finance::{OrderSide, Position, Order};
+use std::{panic};
+use horus_finance::{Position, Order};
 use serde_json::Value;
 
 use crate::exchange_connector::ExchangeConnector;
 
-fn add_order_side(map: &mut HashMap<&str, &str>, order_type: &OrderSide) {
-    match order_type {
-        OrderSide::BUY => { map.insert("side", "buy"); },
-        OrderSide::SELL => { map.insert("side", "sell"); },
-        _ => {},
-    }
-}
+// fn add_order_side(map: &mut HashMap<&str, &str>, order_type: &MarketPosition) {
+//     match order_type {
+//         MarketPosition::LONG => { map.insert("side", "buy"); },
+//         MarketPosition::SHORT => { map.insert("side", "sell"); },
+//         _ => {},
+//     }
+// }
 
-fn validate_order(side: &OrderSide, quantity: &f32, price: &f32) {
+// fn validate_order(side: &MarketPosition, quantity: &f32, price: &f32) {
 
-    const MIN_BUY: f32 = 50.;
+//     const MIN_BUY: f32 = 50.;
     
-    match side {
-        OrderSide::BUY => {
-            let price_total = (*quantity as f32) * *price;
+//     match side {
+//         MarketPosition::LONG => {
+//             let price_total = (*quantity as f32) * *price;
 
-            if price_total < MIN_BUY {
-                panic!("Invalid order");
-            }
-        }
-        _ => {},
-    }
-}
+//             if price_total < MIN_BUY {
+//                 panic!("Invalid order");
+//             }
+//         }
+//         _ => {},
+//     }
+// }
 
 pub struct LemonMarketsConnector {
     client: reqwest::Client,
@@ -79,26 +79,26 @@ impl LemonMarketsConnector {
 
 impl ExchangeConnector for LemonMarketsConnector {
 
-    fn route_order(&self, order: &Order) -> bool {
-        validate_order(&order.side, &order.quantity, &order.price);
+    fn route_order(&self, _order: &Order) -> bool {
+        // validate_order(&order.side, &order.quantity, &order.price);
 
-        let request = self.client.post(format!("{}/v1/orders/", self.base_url))
-          .header("Authorization", String::from(&self.auth_key));
+        // let request = self.client.post(format!("{}/v1/orders/", self.base_url))
+        //   .header("Authorization", String::from(&self.auth_key));
         
-        let mut map = HashMap::<&str, &str>::new();
-        let price_as_str = order.price.to_string();
-        let amount_as_str = order.quantity.to_string();
-        let venue = String::from("XMUN");
+        // let mut map = HashMap::<&str, &str>::new();
+        // let price_as_str = order.price.to_string();
+        // let amount_as_str = order.quantity.to_string();
+        // let venue = String::from("XMUN");
     
-        map.insert("isin", &order.instrument_symbol);
-        add_order_side(&mut map, &order.side);
-        map.insert("quantity", &amount_as_str);
-        map.insert("limit_price", &price_as_str);
-        map.insert("venue", &venue);
-        map.insert("expires_at", &order.expiration_date);
+        // map.insert("isin", &order.instrument_symbol);
+        // add_order_side(&mut map, &order.side);
+        // map.insert("quantity", &amount_as_str);
+        // map.insert("limit_price", &price_as_str);
+        // map.insert("venue", &venue);
+        // map.insert("expires_at", &order.expiration_date);
     
-        let sending = request.json(&map).send();
-        futures::executor::block_on(sending).unwrap();
+        // let sending = request.json(&map).send();
+        // futures::executor::block_on(sending).unwrap();
         true
     }
 }
