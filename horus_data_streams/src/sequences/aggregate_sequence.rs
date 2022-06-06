@@ -34,11 +34,8 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
 
         *sequence_sum += aggregate.close;
 
-        match dequeued {
-            Some(removed_agg) => {
-                *sequence_sum -= removed_agg.close;
-            }
-            _ => {}
+        if let Some(removed_agg) = dequeued {
+            *sequence_sum -= removed_agg.close;
         }
 
         if is_ready {
