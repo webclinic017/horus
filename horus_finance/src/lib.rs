@@ -10,7 +10,7 @@ pub struct Aggregate {
 
 impl Clone for Aggregate {
     fn clone(&self) -> Self {
-        Self { open: self.open.clone(), close: self.close.clone() }
+        Self { open: self.open, close: self.close }
     }
 }
 

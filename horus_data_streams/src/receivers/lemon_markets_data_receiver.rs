@@ -3,21 +3,23 @@ use std::thread;
 
 use horus_finance::Aggregate;
 
-pub struct LemonMarketsDataReceiver {
+pub struct LemonMarketsDataReceiver<'a, ONDATARECEIVE: Fn(Aggregate)> {
     pub exchange: String,
-    pub instrument_isin: String
+    pub instrument_isin: String,
+    on_data_receive: &'a ONDATARECEIVE
 }
 
-impl LemonMarketsDataReceiver {
+impl<'a, ONDATARECEIVE: Fn(Aggregate)> LemonMarketsDataReceiver<'a, ONDATARECEIVE> {
 
-    pub fn new(exchange: &str, instrument_isin: &str) -> LemonMarketsDataReceiver {
+    pub fn new(exchange: &str, instrument_isin: &str, on_data_receive: &'a ONDATARECEIVE) -> LemonMarketsDataReceiver<'a, ONDATARECEIVE> {
         LemonMarketsDataReceiver {
             exchange: String::from(exchange),
-            instrument_isin: String::from(instrument_isin)
+            instrument_isin: String::from(instrument_isin),
+            on_data_receive
         }
     } 
 
-    pub fn start_listening<'a>(&self, on_data_receive: &'a dyn Fn(Aggregate)) {
+    pub fn start_listening(&self) {
         
         loop {
             let new_aggregate = Aggregate {
@@ -25,7 +27,7 @@ impl LemonMarketsDataReceiver {
                 close: 1337.
             };
             println!("Simulate exchange tick");
-            on_data_receive(new_aggregate);
+            (self.on_data_receive)(new_aggregate);
 
             thread::sleep(time::Duration::from_millis(200));
         }

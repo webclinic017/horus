@@ -25,12 +25,13 @@ impl Iterator for MarketSimulation {
 
         if self.market_data.len() > self.index {
             self.index += 1;
-            return Some(self.market_data[self.index - 1]);
+            Some(self.market_data[self.index - 1])
         } else {
-            return None;
+            None
         }
     }
 }
+
 pub struct BacktestResult {
     pub profit_loss_rel: f32,
     pub profit_loss_abs: f32,
@@ -59,7 +60,7 @@ impl PartialOrd for BacktestResult {
 
 impl Clone for BacktestResult {
     fn clone(&self) -> Self {
-        Self { profit_loss_rel: self.profit_loss_rel.clone(), profit_loss_abs: self.profit_loss_abs.clone(), alpha: self.alpha.clone() }
+        Self { profit_loss_rel: self.profit_loss_rel, profit_loss_abs: self.profit_loss_abs, alpha: self.alpha }
     }
 }
 
@@ -68,14 +69,8 @@ impl Copy for BacktestResult {
 }
 
 fn validate_order(order: &Order) {
-    match order.price {
-        Some(_) => panic!("Backtesting is currently only available for market order"),
-        _ => {}
-    }
-    match order.expiration_date {
-        Some(_) => panic!("Backtesting is currently only available for market order"),
-        _ => {}
-    }
+    if order.price.is_some() { panic!("Backtesting is currently only available for market order") }
+    if order.expiration_date.is_some() { panic!("Backtesting is currently only available for market order") }
 }
 
 pub fn run_backtest<STRATEGY: Strategy, MARKET: DataReceiver<Aggregate>>(strategy: &STRATEGY, markets: &mut Vec<MarketSimulation>, simulated_market: &MARKET) -> BacktestResult {
@@ -99,7 +94,7 @@ pub fn run_backtest<STRATEGY: Strategy, MARKET: DataReceiver<Aggregate>>(strateg
             0 => {},
             1 => {
                 let order = &orders[0];
-                validate_order(&order);
+                validate_order(order);
                 if order.side != current_side {
                     match order.side {
                         MarketPosition::SHORT => {
@@ -124,7 +119,7 @@ pub fn run_backtest<STRATEGY: Strategy, MARKET: DataReceiver<Aggregate>>(strateg
 
     let strategy_handle = strategy.run(backtest_handler);
 
-    for aggregate in market.into_iter() {
+    for aggregate in market.by_ref() {
         simulated_market.inject(aggregate);
     }
 

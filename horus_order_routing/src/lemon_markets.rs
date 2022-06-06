@@ -58,12 +58,12 @@ impl LemonMarketsConnector {
                 let raw_quantity = &position["quantity"];
                 match raw_quantity {
                     Value::Number(quantity) => { 
-                        return Some(Position {
+                        Some(Position {
                             quantity: quantity.as_f64()? as f32
                         })
                     }
                     Value::String(quantity) => { 
-                        return Some(Position {
+                        Some(Position {
                             quantity: quantity.parse::<f32>().unwrap()
                         })
                     }
@@ -71,7 +71,7 @@ impl LemonMarketsConnector {
                 }
                 
             }
-            Value::Null => { return None; }
+            Value::Null => { None }
             _ => { panic!(); }
         } 
     }

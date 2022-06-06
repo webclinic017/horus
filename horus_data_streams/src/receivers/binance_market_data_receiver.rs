@@ -27,21 +27,18 @@ impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for BinanceMarket
     fn start_listening(&self) {
             let keep_running = AtomicBool::new(true);
             let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
-                match event {
-                    WebsocketEvent::Kline(kline_event) => {
-                        let new_aggregate = Aggregate {
-                            open: kline_event.kline.open.parse::<f32>().unwrap(),
-                            close: kline_event.kline.close.parse::<f32>().unwrap()
-                        };
-                        println!("Received binance data");
-                        let _ = &(self.on_data_receive)(new_aggregate);
-                    },
-                    _ => (),
-                };
+                if let WebsocketEvent::Kline(kline_event) = event {
+                    let new_aggregate = Aggregate {
+                        open: kline_event.kline.open.parse::<f32>().unwrap(),
+                        close: kline_event.kline.close.parse::<f32>().unwrap()
+                    };
+                    println!("Received binance data");
+                    let _ = &(self.on_data_receive)(new_aggregate);
+                }
                 Ok(())
             });
 
-        let kline: String = format!("{}", "btceur@kline_1m");
+        let kline: String = "btceur@kline_1m".to_string();
         web_socket.connect(&kline).unwrap();
         web_socket.event_loop(&keep_running).unwrap();
     }

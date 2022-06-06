@@ -16,16 +16,16 @@ impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for MockMarketDat
     }
 
     fn get_historical_data(&self, _start: chrono::DateTime<chrono::Utc>, _end: chrono::DateTime<chrono::Utc>) -> Vec<Aggregate> {
-        let mut mock_data = Vec::<Aggregate>::new();
-
-        mock_data.push(Aggregate {
-            open: 1.,
-            close: 2.
-        });
-        mock_data.push(Aggregate {
-            open: 2.,
-            close: 3.
-        });
+        let mock_data = vec![
+            Aggregate {
+                open: 1.,
+                close: 2.
+            },
+            Aggregate {
+                open: 2.,
+                close: 3.
+            }
+        ];
 
         mock_data
     }

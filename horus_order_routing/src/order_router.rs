@@ -8,7 +8,7 @@ fn publish_order(order: &Order) {
 
 pub fn route_order<E>(order: &Order, exchange_connector: &E) where E: ExchangeConnector {
 
-    exchange_connector.route_order(&order);
+    exchange_connector.route_order(order);
 
     publish_order(order);
 }

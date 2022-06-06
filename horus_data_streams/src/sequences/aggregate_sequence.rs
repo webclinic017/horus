@@ -26,24 +26,18 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
 
     pub fn enqueue_for_moving_average(&self, aggregate: &Aggregate, sequence_sum: &mut f32) -> Option<f32> {
 
-        let is_ready;
+        let current_size: usize = self.data.borrow().len();
 
-        let current_size: usize = self.data.borrow().len().try_into().unwrap();
-
-        if current_size < SIZE - 1 {
-            is_ready = false;
-        } else {
-            is_ready = true;
-        }
+        let is_ready = current_size < SIZE - 1;
 
         let dequeued = self.enqueue(aggregate);
 
-        *sequence_sum = *sequence_sum + aggregate.close;
+        *sequence_sum -= aggregate.close;
 
         match dequeued {
             None => {}
             Some(removed_agg) => {
-                *sequence_sum = *sequence_sum - removed_agg.close;
+                *sequence_sum -= removed_agg.close;
             }
         }
 
@@ -58,10 +52,7 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
 
         let dequeued = self.enqueue(aggregate);
 
-        match dequeued {
-            Some(deq) => Some((aggregate.close - deq.close) * 100. / deq.close),
-            None => None
-        }
+        dequeued.map(|deq| (aggregate.close - deq.close) * 100. / deq.close)
     }
 
     // pub fn enqueue_for_average_true_range(&self, aggregate: &Aggregate) -> Option<f32> {
@@ -85,6 +76,12 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
 
     //     todo!()
     // }
+}
+
+impl<const SIZE: usize> Default for Sequence<Aggregate, SIZE> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[cfg(test)]

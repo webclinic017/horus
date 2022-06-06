@@ -9,6 +9,12 @@ impl MockExchangeConnector {
     }
 }
 
+impl Default for MockExchangeConnector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ExchangeConnector for MockExchangeConnector {
 
     fn route_order(&self, order: &horus_finance::Order) -> bool {
