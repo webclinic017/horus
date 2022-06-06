@@ -55,21 +55,12 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
     }
 
     pub fn enqueue_for_rate_of_change(&self, aggregate: &Aggregate) -> Option<f32> {
-        
-        let is_ready;
 
-        let current_size: usize = self.data.borrow().len().try_into().unwrap();
+        let dequeued = self.enqueue(aggregate);
 
-        if current_size < SIZE - 1 {
-            is_ready = false;
-        } else {
-            is_ready = true;
-        }
-
-        if is_ready {
-            Some(*sequence_sum / (SIZE - 1) as f32)
-        } else {
-            None
+        match dequeued {
+            Some(deq) => Some((aggregate.close - deq.close) * 100. / deq.close),
+            None => None
         }
     }
 
@@ -167,6 +158,7 @@ mod moving_average_tests {
 #[cfg(test)]
 mod rate_of_change_tests {
 
+    use float_cmp::approx_eq;
     use horus_finance::Aggregate;
 
     use crate::sequences::{sequence::Sequence, aggregate_sequence::test_sequences::{create_stable_market, create_linear_growing_market, create_linear_falling_market, create_moving_market}};
@@ -175,7 +167,7 @@ mod rate_of_change_tests {
     fn should_compute_correct_rate_of_change_in_stable_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 11>::new();
+        let seq = Sequence::<Aggregate, 8>::new();
         let market = create_stable_market();
 
         let mut rate_of_change: Option<f32> = None;
@@ -206,7 +198,7 @@ mod rate_of_change_tests {
         }
 
         // Assert
-        assert_eq!(Some(0.375), rate_of_change);
+        assert!( approx_eq!(f32, 66.6666666, rate_of_change.unwrap(), ulps = 2) );
     }
 
     #[test]
@@ -225,14 +217,14 @@ mod rate_of_change_tests {
         }
 
         // Assert
-        assert_eq!(Some(-0.75), rate_of_change);
+        assert!( approx_eq!(f32, -80.00, rate_of_change.unwrap(), ulps = 2) );
     }
 
     #[test]
     fn should_compute_correct_rate_of_change_in_moving_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 5>::new();
+        let seq = Sequence::<Aggregate, 4>::new();
         let market = create_moving_market();
 
         let mut rate_of_change: Option<f32> = None;
@@ -244,7 +236,7 @@ mod rate_of_change_tests {
         }
 
         // Assert
-        assert_eq!(Some(1.), rate_of_change);
+        assert!( approx_eq!(f32, 100.00, rate_of_change.unwrap(), ulps = 2) );
     }
  }
 
@@ -298,7 +290,7 @@ mod test_sequences {
 
         let mut aggregates: Vec<Aggregate> = Vec::new();
 
-        for i in 0..9 {
+        for i in 0..10 {
 
             let aggregate = Aggregate {
                 open: 11. - i as f32,
@@ -332,7 +324,7 @@ mod test_sequences {
 
         let mut aggregates: Vec<Aggregate> = Vec::new();
 
-        for i in 1..10 {
+        for i in 1..11 {
 
             let open: f32;
             let close: f32;

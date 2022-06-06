@@ -10,4 +10,5 @@ horus_finance = { path = "../horus_finance"}
 # EXTERNAL
 heapless = "0.7.10"
 chrono = "0.4.19"
+float-cmp = "0.9.0"
 binance = { git = "https://github.com/wisespace-io/binance-rs.git" }
