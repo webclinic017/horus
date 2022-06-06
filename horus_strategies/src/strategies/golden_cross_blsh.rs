@@ -14,8 +14,4 @@ impl<const SHORT_MA: usize, const LONG_MA: usize> Strategy for GoldenCrossBLSH<S
     fn get_name() -> &'static str {
         return "GoldenCrossBLSH";
     }
-
-    fn get_strategy_matrix() -> Vec<Self> where Self: Sized {
-        todo!()
-    }
 }

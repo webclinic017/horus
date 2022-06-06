@@ -17,17 +17,17 @@ pub struct GoldenCrossSignal<const SHORT_MA: usize, const LONG_MA: usize> {
     short_below_long: RefCell<Option<bool>>
 }
 
-impl<const SHORT_MA: usize, const LONG_MA: usize> GoldenCrossSignal<SHORT_MA, LONG_MA> {
-    fn new() -> GoldenCrossSignal<SHORT_MA, LONG_MA> {
-        GoldenCrossSignal { 
-            short_moving_average_seq: Sequence::<Aggregate, SHORT_MA>::new(),
-            long_moving_average_seq: Sequence::<Aggregate, LONG_MA>::new(),
-            short_moving_avg_sum: RefCell::new(0.),
-            long_moving_avg_sum: RefCell::new(0.),
-            short_below_long: RefCell::new(None)
-        }
-    }
-}
+// impl<const SHORT_MA: usize, const LONG_MA: usize> GoldenCrossSignal<SHORT_MA, LONG_MA> {
+//     fn new() -> GoldenCrossSignal<SHORT_MA, LONG_MA> {
+//         GoldenCrossSignal { 
+//             short_moving_average_seq: Sequence::<Aggregate, SHORT_MA>::new(),
+//             long_moving_average_seq: Sequence::<Aggregate, LONG_MA>::new(),
+//             short_moving_avg_sum: RefCell::new(0.),
+//             long_moving_avg_sum: RefCell::new(0.),
+//             short_below_long: RefCell::new(None)
+//         }
+//     }
+// }
 
 impl<const SHORT_MA: usize, const LONG_MA: usize> Signal<Aggregate, GoldenCrossSignalType> for GoldenCrossSignal<SHORT_MA, LONG_MA> {
     fn next(&self, aggregate: &Aggregate) -> Option<GoldenCrossSignalType> {
