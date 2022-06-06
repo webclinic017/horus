@@ -28,17 +28,17 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
 
         let current_size: usize = self.data.borrow().len();
 
-        let is_ready = current_size < SIZE - 1;
+        let is_ready = current_size >= SIZE - 1;
 
         let dequeued = self.enqueue(aggregate);
 
-        *sequence_sum -= aggregate.close;
+        *sequence_sum += aggregate.close;
 
         match dequeued {
-            None => {}
             Some(removed_agg) => {
                 *sequence_sum -= removed_agg.close;
             }
+            _ => {}
         }
 
         if is_ready {
@@ -54,28 +54,6 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
 
         dequeued.map(|deq| (aggregate.close - deq.close) * 100. / deq.close)
     }
-
-    // pub fn enqueue_for_average_true_range(&self, aggregate: &Aggregate) -> Option<f32> {
-
-    //     let current_size: usize = self.data.borrow().len().try_into().unwrap();
-
-    //     if current_size < SIZE {
-    //         return None
-    //     }
-
-    //     todo!()
-    // }
-
-    // pub fn enqueue_for_momentum(&self, aggregate: &Aggregate) -> Option<f32> {
-
-    //     let current_size: usize = self.data.borrow().len().try_into().unwrap();
-
-    //     if current_size < SIZE {
-    //         return None
-    //     }
-
-    //     todo!()
-    // }
 }
 
 impl<const SIZE: usize> Default for Sequence<Aggregate, SIZE> {
