@@ -29,8 +29,7 @@ This project has a huge focus on performance and reliability. The trading agents
 ### General
 - SPIKE: Make use of incode documentation
 - Apply performance tips from the rust perf book to the entire codebase
-- Make the whole project representable
-- Create tutorials on how to create a strategy, how to backtest a strategy, and how to run a strategy
+- Make the whole project representable. Create tutorials on how to create a strategy, how to backtest a strategy, and how to run a strategy
 
 ### Backtesting
 - Implement backtesting based on fixed time intervals
