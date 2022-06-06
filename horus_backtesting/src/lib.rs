@@ -136,3 +136,8 @@ pub fn run_backtest<STRATEGY: Strategy, MARKET: DataReceiver<Aggregate>>(strateg
         alpha
     }
 }
+
+// pub fn run<STRATEGY: Strategy>(strategy: &STRATEGY) {
+
+//     let sequences
+// }

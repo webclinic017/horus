@@ -32,7 +32,6 @@ impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for BinanceMarket
                         open: kline_event.kline.open.parse::<f32>().unwrap(),
                         close: kline_event.kline.close.parse::<f32>().unwrap()
                     };
-                    println!("Received binance data");
                     let _ = &(self.on_data_receive)(new_aggregate);
                 }
                 Ok(())

@@ -696,10 +696,10 @@ name = "horus_agent"
 version = "0.1.0"
 dependencies = [
  "futures",
- "heapless",
  "horus_data_streams",
  "horus_finance",
  "horus_order_routing",
+ "horus_strategies",
 ]
 
 [[package]]

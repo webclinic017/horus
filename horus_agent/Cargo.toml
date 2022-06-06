@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 # INTERNAL
-horus_finance = { path = "../horus_finance"}
+horus_finance = { path = "../horus_finance" }
+horus_strategies = { path = "../horus_strategies" }
 horus_order_routing = { path = "../horus_order_routing" }
 horus_data_streams = { path = "../horus_data_streams" }
 
 # EXTERNAL
-heapless = "0.7.10"
 futures = "0.3.21"

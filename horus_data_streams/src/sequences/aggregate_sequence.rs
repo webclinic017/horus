@@ -212,48 +212,6 @@ mod rate_of_change_tests {
     }
  }
 
-// #[cfg(test)]
-// mod average_true_range_tests {
-
-//     use horus_finance::Aggregate;
-
-//     use crate::sequences::sequence::Sequence;
-
-//     #[test]
-//     fn should_not_compute_average_true_range_when_sequence_is_not_ready() {
-
-//         // Arrange
-//         let seq = Sequence::<Aggregate, 10>::new();
-        
-//         // Act
-//         let average_true_range = seq.get_average_true_range();
-
-//         // Assert
-//         assert_eq!(None, average_true_range);
-//     }
-//  }
-
-// #[cfg(test)]
-// mod momentum_tests {
-
-//     use horus_finance::Aggregate;
-
-//     use crate::sequences::sequence::Sequence;
-
-//     #[test]
-//     fn should_not_compute_momentum_when_sequence_is_not_ready() {
-
-//         // Arrange
-//         let seq = Sequence::<Aggregate, 10>::new();
-        
-//         // Act
-//         let momentum = seq.get_momentum();
-
-//         // Assert
-//         assert_eq!(None, momentum);
-//     }
-//  }
-
  #[cfg(test)]
 mod test_sequences {
     use horus_finance::Aggregate;
