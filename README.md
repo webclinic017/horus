@@ -1,4 +1,4 @@
-[![Rust](https://github.com/int0x81/horus_rust_/actions/workflows/rust.yml/badge.svg)](https://github.com/int0x81/horus_edge/actions/workflows/rust.yml)
+[![Rust](https://github.com/int0x81/horus/actions/workflows/rust.yml/badge.svg)](https://github.com/int0x81/horus/actions/workflows/rust.yml)
 
 # Horus
 
@@ -27,14 +27,10 @@ This project has a huge focus on performance and reliability. The trading agents
 ## TODOS
 
 ### General
-- SPIKE: Make use of Clippy (in the pipeline)
 - SPIKE: Make use of incode documentation
 - Apply performance tips from the rust perf book to the entire codebase
 - Make the whole project representable
 - Create tutorials on how to create a strategy, how to backtest a strategy, and how to run a strategy
-
-### Autoquant
-- Consider the case that no strategy has been found
 
 ### Backtesting
 - Implement backtesting based on fixed time intervals
@@ -50,3 +46,6 @@ This project has a huge focus on performance and reliability. The trading agents
 
 ### Terminal
 - Migrate the entire C# Horus Terminal
+
+### Autoquant
+- Consider the case that no strategy has been found
