@@ -697,8 +697,8 @@ version = "0.1.0"
 dependencies = [
  "futures",
  "horus_data_streams",
+ "horus_exchanges",
  "horus_finance",
- "horus_order_routing",
  "horus_strategies",
 ]
 
@@ -735,17 +735,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "horus_finance"
-version = "0.1.0"
-dependencies = [
- "chrono",
-]
-
-[[package]]
-name = "horus_order_routing"
+name = "horus_exchanges"
 version = "0.1.0"
 dependencies = [
  "futures",
+ "horus_data_streams",
  "horus_finance",
  "reqwest",
  "serde",
@@ -753,10 +747,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "horus_finance"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+]
+
+[[package]]
 name = "horus_strategies"
 version = "0.1.0"
 dependencies = [
  "horus_data_streams",
+ "horus_exchanges",
  "horus_finance",
 ]
 

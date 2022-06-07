@@ -1,2 +1,2 @@
 pub mod strategy;
-pub mod golden_cross_blsh;
+pub mod inter_market_arbitrage;

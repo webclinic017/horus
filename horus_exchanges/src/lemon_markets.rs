@@ -2,7 +2,7 @@ use std::{panic};
 use horus_finance::{Position, Order};
 use serde_json::Value;
 
-use crate::exchange_connector::ExchangeConnector;
+use crate::market_connector::ExchangeConnector;
 
 // fn add_order_side(map: &mut HashMap<&str, &str>, order_type: &MarketPosition) {
 //     match order_type {
