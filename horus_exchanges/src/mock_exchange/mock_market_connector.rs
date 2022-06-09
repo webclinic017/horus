@@ -2,7 +2,7 @@ use horus_finance::order_book::Orderbook;
 
 use crate::market_connector::MarketConnector;
 
-pub struct MockExchange {
+pub struct MockMarketConnector {
     pub order_book: Orderbook
 }
 
@@ -18,6 +18,14 @@ impl MockMarketConnector {
     }
 
     pub fn inject(&self, order: Aggregate) {
+        todo!();
+    }
+
+    pub fn get_asset_balance() -> usize {
+        todo!();
+    }
+
+    pub fn get_cash_balance() -> f32 {
         todo!();
     }
 }
