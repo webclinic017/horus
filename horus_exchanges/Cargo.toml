@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 # INTERNAL
 horus_finance = { path = "../horus_finance" }
-horus_data_streams = { path = "../horus_data_streams" }
 
 # EXTERNAL
 futures = "0.3.21"

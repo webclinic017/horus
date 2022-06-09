@@ -739,7 +739,6 @@ name = "horus_exchanges"
 version = "0.1.0"
 dependencies = [
  "futures",
- "horus_data_streams",
  "horus_finance",
  "reqwest",
  "serde",
