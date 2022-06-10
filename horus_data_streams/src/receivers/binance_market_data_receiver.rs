@@ -1,6 +1,6 @@
 use std::sync::atomic::AtomicBool;
 
-use horus_finance::Aggregate;
+use horus_finance::aggregate::Aggregate;
 use binance::{websockets::*, market::Market, api::Binance};
 
 use super::data_receiver::DataReceiver;

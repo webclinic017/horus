@@ -1,5 +1,5 @@
 use horus_data_streams::{receivers::data_receiver::DataReceiver};
-use horus_finance::{Order, MarketPosition, Aggregate};
+use horus_finance::{order::Order, market_position::MarketPosition, aggregate::Aggregate};
 use horus_strategies::strategies::strategy::Strategy;
 
 pub struct MarketSimulation {

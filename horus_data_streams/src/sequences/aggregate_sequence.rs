@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
 use heapless::spsc::Queue;
-use horus_finance::Aggregate;
+use horus_finance::aggregate::Aggregate;
 
 use super::sequence::Sequence;
 
@@ -62,7 +62,7 @@ impl<const SIZE: usize> Default for Sequence<Aggregate, SIZE> {
 #[cfg(test)]
 mod moving_average_tests {
 
-    use horus_finance::Aggregate;
+    use horus_finance::aggregate::Aggregate;
 
     use crate::sequences::{sequence::Sequence, aggregate_sequence::test_sequences::{create_linear_growing_market, create_moving_market, create_stable_market}};
 
@@ -131,7 +131,7 @@ mod moving_average_tests {
 mod rate_of_change_tests {
 
     use float_cmp::approx_eq;
-    use horus_finance::Aggregate;
+    use horus_finance::aggregate::Aggregate;
 
     use crate::sequences::{sequence::Sequence, aggregate_sequence::test_sequences::{create_stable_market, create_linear_growing_market, create_linear_falling_market, create_moving_market}};
 
@@ -214,7 +214,7 @@ mod rate_of_change_tests {
 
  #[cfg(test)]
 mod test_sequences {
-    use horus_finance::Aggregate;
+    use horus_finance::aggregate::Aggregate;
  
     pub fn create_linear_falling_market() -> Vec<Aggregate> {
 

@@ -1,15 +1,16 @@
 use horus_data_streams::receivers::data_receiver::DataReceiver;
-use horus_finance::Aggregate;
+use horus_exchanges::connectors::market_connector::MarketConnector;
+use horus_finance::aggregate::Aggregate;
 
 use super::strategy::Strategy;
 
-struct InterMarketArbitrage<'a, ExOne: DataReceiver<Aggregate>, ExTwo: DataReceiver<Aggregate>> {
+struct InterMarketArbitrage<'a, ExOne: MarketConnector, ExTwo: MarketConnector> {
     exchange_connector_01: &'a ExOne,
     exchange_connector_02: &'a ExTwo
 }
 
 impl<'a, ExOne: MarketConnector, ExTwo: MarketConnector> Strategy for InterMarketArbitrage<'a, ExOne, ExTwo> {
-    fn run<REPORTER: Reporter>(&self, order_handler: Reporter) -> std::thread::JoinHandle<()> {
+    fn run(&self) -> std::thread::JoinHandle<()> {
         todo!()
     }
 

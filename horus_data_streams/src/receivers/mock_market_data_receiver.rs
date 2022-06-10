@@ -1,4 +1,4 @@
-use horus_finance::Aggregate;
+use horus_finance::aggregate::Aggregate;
 
 use super::data_receiver::DataReceiver;
 

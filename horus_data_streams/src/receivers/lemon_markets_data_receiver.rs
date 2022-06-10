@@ -1,7 +1,7 @@
 use core::time;
 use std::thread;
 
-use horus_finance::Aggregate;
+use horus_finance::aggregate::Aggregate;
 
 pub struct LemonMarketsDataReceiver<'a, ONDATARECEIVE: Fn(Aggregate)> {
     pub exchange: String,

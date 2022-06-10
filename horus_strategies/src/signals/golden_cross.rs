@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use horus_data_streams::sequences::sequence::Sequence;
-use horus_finance::Aggregate;
+use horus_finance::aggregate::Aggregate;
 
 use super::signal::Signal;
 
