@@ -14,6 +14,10 @@ impl<'a, ExOne: MarketConnector, ExTwo: MarketConnector> Strategy for InterMarke
         todo!()
     }
 
+    fn get_market_connectors(&self) -> &Vec<&dyn MarketConnector> {
+        todo!()
+    }
+
     fn get_name() -> &'static str {
         return "Inter Exchange Arbitrage";
     }

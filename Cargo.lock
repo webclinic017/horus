@@ -719,6 +719,7 @@ name = "horus_backtesting"
 version = "0.1.0"
 dependencies = [
  "horus_data_streams",
+ "horus_exchanges",
  "horus_finance",
  "horus_strategies",
 ]

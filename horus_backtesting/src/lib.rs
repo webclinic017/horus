@@ -1,5 +1,6 @@
 use horus_data_streams::{receivers::data_receiver::DataReceiver};
-use horus_finance::{order::Order, market_position::MarketPosition, aggregate::Aggregate};
+use horus_exchanges::{connectors::market_connector::MarketConnector, mock_exchange::mock_market_connector::MockMarketConnector};
+use horus_finance::{order::Order, market_position::MarketPosition, aggregate::Aggregate, order_side::OrderSide};
 use horus_strategies::strategies::strategy::Strategy;
 
 pub struct MarketSimulation {
@@ -73,59 +74,29 @@ fn validate_order(order: &Order) {
     if order.expiration_date.is_some() { panic!("Backtesting is currently only available for market order") }
 }
 
-pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, markets: &mut Vec<MarketSimulation>, simulated_market: &MARKET) -> BacktestResult {
+pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, test: &Vec<Aggregate>, mock_market: &mut MockMarketConnector) -> BacktestResult {
 
-    if markets.len() != 1 {
-        panic!("Backtesting is currently only available for single markets");
-    }
+    // let markets = strategy.get_market_connectors();
 
-    let market = &mut markets[0];
+    // if markets.len() != 1 {
+    //     panic!("Backtesting is currently only available for single markets");
+    // }
 
-    let initial_ask: f32 = market.get_current_ask();
-    let mut amount_asset: f32 = 0.;
+    // let market = markets[0];
+
+    let initial_ask: f32 = test[0].close;
     let mut amount_quote: f32 = 1000.;
     let mut current_side: MarketPosition = MarketPosition::NEUTRAL;
 
-    let backtest_handler = |orders: Vec<Order>| {
+    let strategy_handle = strategy.run();
 
-        let amount_orders = orders.len();
-        
-        match amount_orders {
-            0 => {},
-            1 => {
-                let order = &orders[0];
-                validate_order(order);
-                if order.side != current_side {
-                    match order.side {
-                        MarketPosition::SHORT => {
-                            amount_quote = amount_asset * market.get_current_bid();
-                            amount_asset = 0.;
-                            current_side = MarketPosition::SHORT;
-                        }
-                        MarketPosition::NEUTRAL => {
-                            current_side = MarketPosition::NEUTRAL;
-                        }
-                        MarketPosition::LONG => {
-                            amount_asset = amount_quote * market.get_current_ask();
-                            amount_quote = 0.;
-                            current_side = MarketPosition::LONG
-                        }
-                    }
-                }
-            },
-            _ => panic!("Backtesting is currently only available for single markets")
-        }
-    };
-
-    let strategy_handle = strategy.run(backtest_handler);
-
-    for aggregate in market.by_ref() {
-        simulated_market.inject(aggregate);
+    for aggregate in test {
+        mock_market.inject_aggregate(*aggregate);
     }
 
     strategy_handle.join().unwrap();
 
-    let buy_and_hold_rel: f32 = market.get_current_bid() / initial_ask;
+    let buy_and_hold_rel: f32 = test[test.len() - 1].close / initial_ask;
     let strategy_rel: f32 = amount_quote / initial_ask;
 
     let alpha: f32 = strategy_rel / buy_and_hold_rel - 1.;
