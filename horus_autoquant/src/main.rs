@@ -5,9 +5,9 @@ fn test_inter_market_arbitrage_strategy() {
     //1. Describe Strategy
     let binance_spot = BinanceSpotOrderBookReceiver::new("BTCEUR");
     let munich_exchange = MunichExchangeOrderBookReceiver::new("BTCETF");
-    let fake_exchange_01 = MockExchangeConnector::new();
-    let fake_exchange_02 = MockExchangeConnector::new();
-    let strategy = InterMarketArbitrageStrategy<MockExchangeConnector, MockExchangeConnector>::new(&fake_exchange_01, &fake_exchange_02);
+    let fake_exchange_01 = MockMarketConnector::new();
+    let fake_exchange_02 = MockMarketConnector::new();
+    let strategy = InterMarketArbitrageStrategy::<MockMarketConnector, MockMarketConnector>::new(&fake_exchange_01, &fake_exchange_02);
 
     //2. Describe Simulation
     let start_date: DateTime<UTC> = "";

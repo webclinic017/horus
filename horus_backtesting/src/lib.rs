@@ -73,7 +73,7 @@ fn validate_order(order: &Order) {
     if order.expiration_date.is_some() { panic!("Backtesting is currently only available for market order") }
 }
 
-pub fn run_backtest<STRATEGY: Strategy, MARKET: DataReceiver<Aggregate>>(strategy: &STRATEGY, markets: &mut Vec<MarketSimulation>, simulated_market: &MARKET) -> BacktestResult {
+pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, markets: &mut Vec<MarketSimulation>, simulated_market: &MARKET) -> BacktestResult {
 
     if markets.len() != 1 {
         panic!("Backtesting is currently only available for single markets");
