@@ -59,22 +59,15 @@ impl PartialOrd for BacktestResult {
     }
 }
 
-impl Clone for BacktestResult {
-    fn clone(&self) -> Self {
-        Self { profit_loss_rel: self.profit_loss_rel, profit_loss_abs: self.profit_loss_abs, alpha: self.alpha }
-    }
-}
+// impl Clone for BacktestResult {
+//     fn clone(&self) -> Self {
+//         Self { profit_loss_rel: self.profit_loss_rel, profit_loss_abs: self.profit_loss_abs, alpha: self.alpha }
+//     }
+// }
 
-impl Copy for BacktestResult {
-    
-}
+// impl Copy for BacktestResult { }
 
-fn validate_order(order: &Order) {
-    if order.price.is_some() { panic!("Backtesting is currently only available for market order") }
-    if order.expiration_date.is_some() { panic!("Backtesting is currently only available for market order") }
-}
-
-pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, test: &Vec<Aggregate>, mock_market: &mut MockMarketConnector) -> BacktestResult {
+pub fn run_backtest_on_aggregates<STRATEGY: Strategy>(strategy: &STRATEGY, test: &Vec<Aggregate>, mock_market: &mut MockMarketConnector) -> BacktestResult {
 
     // let markets = strategy.get_market_connectors();
 
@@ -84,9 +77,7 @@ pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, test: &Vec<Aggregat
 
     // let market = markets[0];
 
-    let initial_ask: f32 = test[0].close;
-    let mut amount_quote: f32 = 1000.;
-    let mut current_side: MarketPosition = MarketPosition::NEUTRAL;
+    let initial_ask: f32 = mock_market.get_current_ask();
 
     let strategy_handle = strategy.run();
 
