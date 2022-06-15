@@ -5,16 +5,16 @@ use binance::{websockets::*, market::Market, api::Binance};
 
 use super::data_receiver::DataReceiver;
 
-pub struct BinanceMarketDataReceiver<'a, ONDATARECEIVE: Fn(Aggregate)> {
+pub struct BinanceSpotAggregateReceiver<'a, ONDATARECEIVE: Fn(Aggregate)> {
     market: Market,
     symbol: String,
     interval: String,
     on_data_receive: &'a ONDATARECEIVE
 }
 
-impl<'a, ONDATARECEIVE: Fn(Aggregate)> BinanceMarketDataReceiver<'a, ONDATARECEIVE> {
-    pub fn new(symbol: String, interval: String, on_data_receive: &'a ONDATARECEIVE) -> BinanceMarketDataReceiver<ONDATARECEIVE> {
-        BinanceMarketDataReceiver {
+impl<'a, ONDATARECEIVE: Fn(Aggregate)> BinanceSpotAggregateReceiver<'a, ONDATARECEIVE> {
+    pub fn new(symbol: String, interval: String, on_data_receive: &'a ONDATARECEIVE) -> BinanceSpotAggregateReceiver<ONDATARECEIVE> {
+        BinanceSpotAggregateReceiver {
             market: Binance::new(None, None),
             symbol,
             interval,
@@ -23,7 +23,7 @@ impl<'a, ONDATARECEIVE: Fn(Aggregate)> BinanceMarketDataReceiver<'a, ONDATARECEI
     }
 }
 
-impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for BinanceMarketDataReceiver<'a, ONDATARECEIVE> {
+impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for BinanceSpotAggregateReceiver<'a, ONDATARECEIVE> {
     fn start_listening(&self) {
             let keep_running = AtomicBool::new(true);
             let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {

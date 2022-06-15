@@ -1,37 +1,36 @@
-use horus_data_streams::{receivers::data_receiver::DataReceiver};
-use horus_exchanges::{connectors::market_connector::MarketConnector, mock_exchange::mock_market_connector::MockMarketConnector};
-use horus_finance::{order::Order, market_position::MarketPosition, aggregate::Aggregate, order_side::OrderSide};
+use horus_finance::aggregate::Aggregate;
 use horus_strategies::strategies::strategy::Strategy;
+use test_market_adapter::TestMarketAdapter;
 
-pub struct MarketSimulation {
-    index: usize,
-    pub market_data: Vec<Aggregate>
-}
+// pub struct MarketSimulation {
+//     index: usize,
+//     pub market_data: Vec<Aggregate>
+// }
 
-impl MarketSimulation {
+// impl MarketSimulation {
 
-    fn get_current_bid(&self) -> f32 {
-        self.market_data[self.index].close
-    }
+//     fn get_current_bid(&self) -> f32 {
+//         self.market_data[self.index].close
+//     }
 
-    fn get_current_ask(&self) -> f32 {
-        self.market_data[self.index].close
-    }
-}
+//     fn get_current_ask(&self) -> f32 {
+//         self.market_data[self.index].close
+//     }
+// }
 
-impl Iterator for MarketSimulation {
-    type Item = Aggregate;
+// impl Iterator for MarketSimulation {
+//     type Item = Aggregate;
 
-    fn next(&mut self) -> Option<Self::Item> {
+//     fn next(&mut self) -> Option<Self::Item> {
 
-        if self.market_data.len() > self.index {
-            self.index += 1;
-            Some(self.market_data[self.index - 1])
-        } else {
-            None
-        }
-    }
-}
+//         if self.market_data.len() > self.index {
+//             self.index += 1;
+//             Some(self.market_data[self.index - 1])
+//         } else {
+//             None
+//         }
+//     }
+// }
 
 pub struct BacktestResult {
     pub profit_loss_rel: f32,
@@ -67,39 +66,35 @@ impl PartialOrd for BacktestResult {
 
 // impl Copy for BacktestResult { }
 
-pub fn run_backtest_on_aggregates<STRATEGY: Strategy>(strategy: &STRATEGY, test: &Vec<Aggregate>, mock_market: &mut MockMarketConnector) -> BacktestResult {
+/// The mock market has to be connected to the strategy
+pub fn run_backtest_on_aggregates<STRATEGY: Strategy>(strategy: &STRATEGY, test_simulation: Vec<Aggregate>, adapter: &TestMarketAdapter) -> BacktestResult {
 
-    // let markets = strategy.get_market_connectors();
-
-    // if markets.len() != 1 {
-    //     panic!("Backtesting is currently only available for single markets");
-    // }
-
-    // let market = markets[0];
-
-    let initial_ask: f32 = mock_market.get_current_ask();
+    // SETUP
+    adapter.set_initial_state();
 
     let strategy_handle = strategy.run();
 
+    // RUN TESTS
     for aggregate in test {
-        mock_market.inject_aggregate(*aggregate);
+        adapter.inject_aggregate(*aggregate);
     }
 
     strategy_handle.join().unwrap();
 
-    let buy_and_hold_rel: f32 = test[test.len() - 1].close / initial_ask;
-    let strategy_rel: f32 = amount_quote / initial_ask;
+    // END
+    adapter.finalize_positions();
+
+    let buy_and_hold_rel: f32 = adapter.get_buy_and_hold_relative();
+    let strategy_rel: f32 = adapter.get_strategy_relative();
+    let strategy_abs: f32 = adapter.get_strategy_absolute();
 
     let alpha: f32 = strategy_rel / buy_and_hold_rel - 1.;
 
     BacktestResult { 
         profit_loss_rel: strategy_rel, 
-        profit_loss_abs: amount_quote - initial_ask,
+        profit_loss_abs: strategy_abs,
         alpha
     }
 }
 
-// pub fn run<STRATEGY: Strategy>(strategy: &STRATEGY) {
-
-//     let sequences
-// }
+pub mod test_market_adapter;

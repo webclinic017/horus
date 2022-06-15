@@ -5,8 +5,8 @@ use horus_finance::{aggregate::Aggregate, market_snapshot::MarketSnapshot, order
 use crate::connectors::market_connector::MarketConnector;
 
 pub struct MockMarketConnector {
-    pub current_ask: f32,
-    pub current_bid: f32,
+    pub current_ask: RefCell<f32>,
+    pub current_bid: RefCell<f32>,
     pub asset_balance: RefCell<usize>,
     pub cash_balance: RefCell<f32>
 }
@@ -14,20 +14,32 @@ pub struct MockMarketConnector {
 impl MockMarketConnector {
     pub fn new(initial_cash_balance: f32) -> MockMarketConnector {
         MockMarketConnector {
-            current_ask: 0.,
-            current_bid: 0.,
+            current_ask: RefCell::new(0.),
+            current_bid: RefCell::new(0.),
             asset_balance: RefCell::new(0),
             cash_balance: RefCell::new(initial_cash_balance)
         }
     }
 
-    pub fn inject_snapshot(&mut self, snapshot: MarketSnapshot) {
-        self.current_ask = snapshot.current_ask;
-        self.current_bid = snapshot.current_bid;
+    pub fn inject_snapshot(&self, snapshot: MarketSnapshot) {
+
+        let mut mut_ref_ask = self.current_ask.borrow_mut();
+        let mut mut_ref_bid = self.current_bid.borrow_mut();
+        *mut_ref_ask = snapshot.current_ask;
+        *mut_ref_bid = snapshot.current_bid;
     }
 
-    pub fn inject_aggregate(&mut self, order: Aggregate) {
-        self.current_bid = order.close;
+    pub fn inject_aggregate(&self, order: Aggregate) {
+        let mut mut_ref_ask = self.current_ask.borrow_mut();
+        *mut_ref_ask = order.close;
+    }
+
+    pub fn get_current_ask(&self) -> f32 {
+        *self.current_ask.borrow()
+    }
+
+    pub fn get_current_bid(&self) -> f32 {
+        *self.current_bid.borrow()
     }
 
     pub fn get_asset_balance(&self) -> usize {
@@ -93,7 +105,7 @@ impl MarketConnector for MockMarketConnector {
         let lot_to_transfer;
         match order.side {
             OrderSide::BUY => {
-                price = self.current_ask;
+                price = *self.current_ask.borrow();
                 cash_to_transfer = order.quantity as f32 * price;
 
                 if cash_to_transfer > *cash_balance_ref {
@@ -112,7 +124,7 @@ impl MarketConnector for MockMarketConnector {
                     return false;
                 }
 
-                price = self.current_bid;
+                price = *self.current_bid.borrow();
                 cash_to_transfer = order.quantity as f32 * price;
 
                 lot_to_transfer = (cash_to_transfer / price).floor();

@@ -1,41 +1,45 @@
-// use chrono::DateTime;
+use chrono::TimeZone;
+use horus_backtesting::run_backtest_on_aggregates;
+use horus_data_streams::receivers::{binance_market_data_receiver::BinanceSpotAggregateReceiver, data_receiver::DataReceiver};
+use horus_exchanges::mock_exchange::mock_market_connector::MockMarketConnector;
+use horus_strategies::strategies::{inter_market_arbitrage::InterMarketArbitrageStrategy, buy_low_sell_high::BuyLowSellHighStrategy};
 
 // fn test_inter_market_arbitrage_strategy() {
 
-//     //1. Describe Strategy
-//     let binance_spot = BinanceSpotOrderBookReceiver::new("BTCEUR");
-//     let munich_exchange = MunichExchangeOrderBookReceiver::new("BTCETF");
-//     let fake_exchange_01 = MockMarketConnector::new();
-//     let fake_exchange_02 = MockMarketConnector::new();
-//     let strategy = InterMarketArbitrageStrategy::<MockMarketConnector, MockMarketConnector>::new(&fake_exchange_01, &fake_exchange_02);
+//     // //1. Describe Strategy
+//     let binance_spot = BinanceSpotAggregateReceiver::new("BTCEUR".to_string(), "5m".to_string(), &|_a| {});
+//     let fake_market_01 = MockMarketConnector::new(1000.);
+//     let fake_market_02 = MockMarketConnector::new(1000.);
+//     let strategy = InterMarketArbitrageStrategy::<MockMarketConnector, MockMarketConnector>::new(&fake_market_01, &fake_market_02);
 
 //     //2. Describe Simulation
-//     let start_date: DateTime<UTC> = "";
-//     let end_date: DateTime<UTC> = "";
-//     let historical_01 = binance_spot.get_historical_data(start_date, end_date);
-//     let historical_02 = munich_exchange.get_historical_data(start_date, end_date);
-//     let simulate_next_tick = || {
-//         //big stuff todo
-//         false
-//     };
+//     let start_date = chrono::Utc.ymd(2015, 1, 1).and_hms(0, 0, 0);
+//     let end_date = chrono::Utc::now();
+//     let historical = binance_spot.get_historical_data(start_date, end_date);
+//     let _result = run_backtest_on_aggregates(&strategy, &historical, &fake_market);
 
-//     //3. Describe Reporters
-//     let reporter = BacktestEventReporter::new();
-//     let result_reporter = BacktestResultReporter::new();
-
-//     //4. Run
-//     strategy.run<BacktestEventReporter>().join().unwrap();
-
-//     while !simulate_next_tick() {}
-
-//     let exchange_01_balance = fake_exchange_01.get_balance();
-//     let exchange_02_balance = fake_exchange_02.get_balance();
-
-//     let result = build_backtest_result(&exchange_01_balance, &exchange_02_balance);
-
-//     reporter.report(result);
+//     //3. Report
+//     todo!()
 // }
 
-fn main() {
+fn test_blsh_strategy() {
 
+    //1. Describe Strategy
+    let binance_spot = BinanceSpotAggregateReceiver::new("BTCEUR".to_string(), "5m".to_string(), &|_a| {});
+    let fake_market = MockMarketConnector::new(1000.);
+    let strategy = BuyLowSellHighStrategy::<MockMarketConnector>::new(&fake_market);
+
+    //2. Describe Simulation
+    let start_date = chrono::Utc.ymd(2015, 1, 1).and_hms(0, 0, 0);
+    let end_date = chrono::Utc::now();
+    let historical = binance_spot.get_historical_data(start_date, end_date);
+    let _result = run_backtest_on_aggregates(&strategy, &historical, &fake_market);
+
+    //3. Report
+    todo!()
+}
+
+fn main() {
+    test_blsh_strategy();
+    test_inter_market_arbitrage_strategy();
 }
