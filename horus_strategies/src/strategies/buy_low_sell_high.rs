@@ -20,11 +20,7 @@ impl<'a, Market: MarketConnector> Strategy for BuyLowSellHighStrategy<'a, Market
     fn run(&self) -> std::thread::JoinHandle<()> {
         todo!()
     }
-
-    fn get_market_connectors(&self) -> &Vec<&dyn MarketConnector> {
-        todo!()
-    }
-
+    
     fn get_name() -> &'static str {
         return "Buy Low Sell High";
     }

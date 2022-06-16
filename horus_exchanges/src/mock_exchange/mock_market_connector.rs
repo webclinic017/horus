@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use horus_finance::{aggregate::Aggregate, market_snapshot::MarketSnapshot, order::Order, order_side::OrderSide};
+use horus_finance::{aggregate::Aggregate, order::Order, order_side::OrderSide, market_snapshot::MarketSnapshot};
 
 use crate::connectors::market_connector::MarketConnector;
 

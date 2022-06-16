@@ -1,5 +1,7 @@
 use horus_finance::aggregate::Aggregate;
 use horus_strategies::strategies::strategy::Strategy;
+use market_events::MarketNewAggregateEvent;
+use markets_event_simulation::{MarketsAggregateEventSimulation, MarketsSnapshotEventSimulation};
 use test_market_adapter::TestMarketAdapter;
 
 // pub struct MarketSimulation {
@@ -67,7 +69,7 @@ impl PartialOrd for BacktestResult {
 // impl Copy for BacktestResult { }
 
 /// The mock market has to be connected to the strategy
-pub fn run_backtest_on_aggregates<STRATEGY: Strategy>(strategy: &STRATEGY, test_simulation: Vec<Aggregate>, adapter: &TestMarketAdapter) -> BacktestResult {
+pub fn run_backtest_on_aggregates<STRATEGY: Strategy>(strategy: &STRATEGY, test_simulation: MarketsAggregateEventSimulation, adapter: &TestMarketAdapter) -> BacktestResult {
 
     // SETUP
     adapter.set_initial_state();
@@ -75,8 +77,8 @@ pub fn run_backtest_on_aggregates<STRATEGY: Strategy>(strategy: &STRATEGY, test_
     let strategy_handle = strategy.run();
 
     // RUN TESTS
-    for aggregate in test {
-        adapter.inject_aggregate(*aggregate);
+    for event in test_simulation {
+        adapter.inject_aggregate(&event.market_key, event.aggregate);
     }
 
     strategy_handle.join().unwrap();
@@ -97,4 +99,6 @@ pub fn run_backtest_on_aggregates<STRATEGY: Strategy>(strategy: &STRATEGY, test_
     }
 }
 
+mod market_events;
 pub mod test_market_adapter;
+pub mod markets_event_simulation;
