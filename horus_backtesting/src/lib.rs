@@ -30,7 +30,7 @@ impl PartialOrd for BacktestResult {
     }
 }
 
-pub fn run_backtest_on_snapshots<STRATEGY: Strategy>(strategy: &STRATEGY, test_simulation: MarketsSnapshotEventSimulation, adapter: &TestMarketAdapter) -> BacktestResult {
+pub fn run_backtest_on_snapshots<STRATEGY: Strategy>(strategy: &STRATEGY, simulation: BacktestSimulation, adapter: &TestMarketAdapter) -> BacktestResult {
 
     // SETUP
     adapter.set_initial_state();
@@ -92,4 +92,5 @@ pub fn run_backtest_on_aggregates<STRATEGY: Strategy>(strategy: &STRATEGY, test_
 
 mod market_events;
 pub mod test_market_adapter;
+pub mod simulation_element;
 pub mod markets_event_simulation;

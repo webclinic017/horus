@@ -5,23 +5,31 @@ use horus_exchanges::{mock_exchange::mock_market_connector::MockMarketConnector,
 use horus_finance::{aggregate::Aggregate, market_snapshot::MarketSnapshot};
 
 pub struct TestMarketAdapter<'a> {
-    markets: HashMap<String, &'a MockMarketConnector>
+    markets: HashMap<String, &'a MockMarketConnector>,
+    streams: HashMap<String, &'a DataStream<dyn TimeSeriesElement>>
 }
 
 impl<'a> TestMarketAdapter<'a> {
     pub fn new() -> TestMarketAdapter<'a> {
         TestMarketAdapter {
-            markets: HashMap::new()
+            markets: HashMap::new(),
+            streams: HashMap::new()
         }
     }
 
-    pub fn add_market_connector(&mut self, market_key: &str, market: &'a MockMarketConnector) {
-        self.markets.insert(market_key.to_string(), market);
+    pub fn add_market_connector(&mut self, key: &str, market: &'a MockMarketConnector) {
+        self.markets.insert(key.to_string(), market);
+    }
+
+    pub fn add_stream(&mut self, key: &str, stream: &'a MockDataStream) {
+        self.streams.insert(key.to_string(), market);
     }
 
     pub fn inject_aggregate(&self, market_key: &str, aggregate: Aggregate) {
         let market = self.markets.get(market_key).unwrap();
+        let stream = self.streams.get(market_key).unwrap();
         market.inject_aggregate(aggregate);
+        stream.inject_aggregate
     }
 
     pub fn inject_snapshot(&self, market_key: &str, snapshot: MarketSnapshot) {

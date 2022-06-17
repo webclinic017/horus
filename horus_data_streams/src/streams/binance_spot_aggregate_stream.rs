@@ -1,30 +1,30 @@
-use std::sync::atomic::AtomicBool;
+use std::{sync::atomic::AtomicBool, cell::RefCell, borrow::Borrow};
 
 use horus_finance::aggregate::Aggregate;
 use binance::{websockets::*, market::Market, api::Binance};
 
-use super::data_receiver::DataReceiver;
+use super::data_stream::DataStream;
 
-pub struct BinanceSpotAggregateReceiver<'a, ONDATARECEIVE: Fn(Aggregate)> {
+pub struct BinanceSpotAggregateStream<'a> {
     market: Market,
     symbol: String,
     interval: String,
-    on_data_receive: &'a ONDATARECEIVE
+    middleware: RefCell<Vec<&'a dyn Fn(&str, Aggregate)>>
 }
 
-impl<'a, ONDATARECEIVE: Fn(Aggregate)> BinanceSpotAggregateReceiver<'a, ONDATARECEIVE> {
-    pub fn new(symbol: String, interval: String, on_data_receive: &'a ONDATARECEIVE) -> BinanceSpotAggregateReceiver<ONDATARECEIVE> {
-        BinanceSpotAggregateReceiver {
+impl<'a> BinanceSpotAggregateStream<'a> {
+    pub fn new(symbol: String, interval: String) -> BinanceSpotAggregateStream<'a> {
+        BinanceSpotAggregateStream {
             market: Binance::new(None, None),
             symbol,
             interval,
-            on_data_receive
+            middleware: RefCell::new(Vec::new())
         }
     }
 }
 
-impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for BinanceSpotAggregateReceiver<'a, ONDATARECEIVE> {
-    fn start_listening(&self) {
+impl<'a> DataStream<'a, Aggregate> for BinanceSpotAggregateStream<'a> {
+    fn start_listening(&self, hot_path: &dyn Fn(&str, Aggregate)) {
             let keep_running = AtomicBool::new(true);
             let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
                 if let WebsocketEvent::Kline(kline_event) = event {
@@ -32,7 +32,11 @@ impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for BinanceSpotAg
                         open: kline_event.kline.open.parse::<f32>().unwrap(),
                         close: kline_event.kline.close.parse::<f32>().unwrap()
                     };
-                    let _ = &(self.on_data_receive)(new_aggregate);
+                    let middleware_ref = self.middleware.borrow();
+                    for mw in  middleware_ref.iter() {
+                        mw("binance", new_aggregate);
+                    }
+                    hot_path("binance", new_aggregate);
                 }
                 Ok(())
             });
@@ -42,8 +46,9 @@ impl<'a, ONDATARECEIVE: Fn(Aggregate)> DataReceiver<Aggregate> for BinanceSpotAg
         web_socket.event_loop(&keep_running).unwrap();
     }
 
-    fn inject(&self, aggregate: Aggregate) {
-        let _ = &(self.on_data_receive)(aggregate);
+    fn add_middleware(&self, on_data: &'a dyn Fn(&str, Aggregate) -> ()) {
+        let mut listeners_ref = self.middleware.borrow_mut();
+        listeners_ref.push(on_data);
     }
 
     fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> Vec<Aggregate> {

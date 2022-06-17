@@ -1,6 +1,7 @@
+use horus_data_streams::streams::data_stream::DataReceiver;
 use horus_finance::{aggregate::Aggregate, market_snapshot::MarketSnapshot};
 
-use crate::market_events::{MarketNewAggregateEvent, MarketNewSnapshotEvent};
+use crate::{market_events::{MarketNewAggregateEvent, MarketNewSnapshotEvent}, simulation_element::SimulationElement};
 
 pub struct MarketsAggregateEventSimulation {
     market_data: Vec<MarketNewAggregateEvent>
@@ -8,6 +9,10 @@ pub struct MarketsAggregateEventSimulation {
 
 pub struct MarketsSnapshotEventSimulation {
     market_data: Vec<MarketNewSnapshotEvent>
+}
+
+pub struct BacktestSimulation {
+    time_series_elements: Vec<SimulationElement<'a, Box<dyn TimeSeriesElement>>>
 }
 
 impl MarketsAggregateEventSimulation {

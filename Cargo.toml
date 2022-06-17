@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "horus_common",
     "horus_finance",
     "horus_data_streams",
     "horus_exchanges",
