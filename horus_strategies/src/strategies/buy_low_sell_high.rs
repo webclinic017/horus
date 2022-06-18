@@ -17,8 +17,7 @@ impl<'a, Market: MarketConnector> BuyLowSellHighStrategy<'a, Market> {
 }
 
 impl<'a, Market: MarketConnector> Strategy for BuyLowSellHighStrategy<'a, Market> {
-    fn run(&self) -> std::thread::JoinHandle<()> {
-
+    fn run_hot_path(&self) {
         todo!()
     }
     

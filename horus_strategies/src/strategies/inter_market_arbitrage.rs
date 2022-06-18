@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use horus_data_streams::streams::data_stream::DataStream;
 use horus_exchanges::connectors::market_connector::MarketConnector;
 use horus_finance::{aggregate::Aggregate, market_snapshot::MarketSnapshot, order::Order};
@@ -7,8 +9,8 @@ use super::strategy::Strategy;
 pub struct InterMarketArbitrageStrategy<'a, 
         ConnectorOne: MarketConnector, 
         ConnectorTwo: MarketConnector, 
-        StreamOne: DataStream<'a, MarketSnapshot>, 
-        StreamTwo: DataStream<'a, MarketSnapshot>> {
+        StreamOne: DataStream<MarketSnapshot>, 
+        StreamTwo: DataStream<MarketSnapshot>> {
     market_connector_01: &'a ConnectorOne,
     market_connector_02: &'a ConnectorTwo,
     market_stream_01: &'a mut StreamOne,
@@ -18,8 +20,8 @@ pub struct InterMarketArbitrageStrategy<'a,
 }
 
 impl<'a, ConnectorOne: MarketConnector, ConnectorTwo: MarketConnector, 
-StreamOne: DataStream<'a, MarketSnapshot>, 
-StreamTwo: DataStream<'a, MarketSnapshot>> InterMarketArbitrageStrategy<'a, ConnectorOne, ConnectorTwo, StreamOne, StreamTwo> {
+StreamOne: DataStream<MarketSnapshot>, 
+StreamTwo: DataStream<MarketSnapshot>> InterMarketArbitrageStrategy<'a, ConnectorOne, ConnectorTwo, StreamOne, StreamTwo> {
     pub fn new(connector_01: &'a ConnectorOne, 
     connector_02: &'a ConnectorTwo, 
     stream_01: &'a mut StreamOne, 
@@ -38,28 +40,29 @@ StreamTwo: DataStream<'a, MarketSnapshot>> InterMarketArbitrageStrategy<'a, Conn
 impl<'a, 
 ConnectorOne: MarketConnector, 
 ConnectorTwo: MarketConnector, 
-StreamOne: DataStream<'a, MarketSnapshot>, 
-StreamTwo: DataStream<'a, MarketSnapshot>> Strategy for InterMarketArbitrageStrategy<'a, ConnectorOne, ConnectorTwo, StreamOne, StreamTwo> {
-    fn run(&self) -> std::thread::JoinHandle<()> {
-        let on_data_receive = |market_key:&str, new_snapshot: MarketSnapshot| {
-            //TODO: adjust bid/ask
-            if self.bid_02 > self.ask_01 {
-                let order = Order { 
-                    exchange_id: "".to_string(), 
-                    instrument_symbol: "".to_string(), 
-                    side: horus_finance::order_side::OrderSide::SELL, 
-                    quantity: 0, 
-                    price: None, 
-                    expiration_date: None
-                };
-                //TODO: route order by magic string
-                self.market_connector_01.route_take_order(&order);
-            }
-        };
-        let handle_01 = self.market_stream_01.start_listening(&on_data_receive);
-        let handle_02 = self.market_stream_02.start_listening(&on_data_receive);
+StreamOne: DataStream<MarketSnapshot>, 
+StreamTwo: DataStream<MarketSnapshot>> Strategy for InterMarketArbitrageStrategy<'a, ConnectorOne, ConnectorTwo, StreamOne, StreamTwo> {
+    // fn run(&self) -> std::thread::JoinHandle<()> {
+    //     let rc = Rc::new(on_data_receive);
+    //     let weak_ptr_01 = Rc::downgrade(&rc);
+    //     // let weak_ptr_02 = Rc::downgrade(&rc);
+    //     self.market_stream_01.add_middleware(weak_ptr_01);
+    // }
 
-        todo!("Join handles!");
+    fn run_hot_path(&self) {
+        //TODO: adjust bid/ask
+        if self.bid_02 > self.ask_01 {
+            let order = Order { 
+                exchange_id: "".to_string(), 
+                instrument_symbol: "".to_string(), 
+                side: horus_finance::order_side::OrderSide::SELL, 
+                quantity: 0, 
+                price: None, 
+                expiration_date: None
+            };
+            //TODO: route order by magic string
+            self.market_connector_01.route_take_order(&order);
+        }
     }
 
     fn get_name() -> &'static str {

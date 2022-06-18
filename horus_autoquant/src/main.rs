@@ -1,5 +1,5 @@
 use chrono::TimeZone;
-use horus_backtesting::{run_backtest_on_aggregates, markets_event_simulation::{MarketsSnapshotEventSimulation, MarketsAggregateEventSimulation}, test_market_adapter::TestMarketAdapter, run_backtest_on_snapshots};
+use horus_backtesting::{run_backtest_on_aggregates, backtest_simulation::{MarketsSnapshotEventSimulation, MarketsAggregateEventSimulation}, test_market_adapter::TestMarketAdapter, run_backtest_on_snapshots};
 use horus_data_streams::streams::{binance_spot_aggregate_stream::BinanceSpotAggregateReceiver, data_stream::DataReceiver};
 use horus_exchanges::mock_exchange::mock_market_connector::MockMarketConnector;
 use horus_finance::{aggregate::Aggregate, market_snapshot::MarketSnapshot};
