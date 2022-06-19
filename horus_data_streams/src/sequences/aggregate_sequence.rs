@@ -12,19 +12,19 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
         }
     }
 
-    pub fn enqueue(&self, aggregate: &Aggregate) -> Option<Aggregate> {
+    // pub fn enqueue(&self, aggregate: &Aggregate) -> Option<Aggregate> {
 
-        let mut dequeued: Option<Aggregate> = None;
-        if self.data.borrow().is_full() {
-            dequeued = self.data.borrow_mut().dequeue();
-        }
+    //     let mut dequeued: Option<Aggregate> = None;
+    //     if self.data.borrow().is_full() {
+    //         dequeued = self.data.borrow_mut().dequeue();
+    //     }
 
-        self.data.borrow_mut().enqueue(*aggregate).unwrap();
+    //     self.data.borrow_mut().enqueue(*aggregate).unwrap();
 
-        dequeued
-    }
+    //     dequeued
+    // }
 
-    pub fn enqueue_for_moving_average(&self, aggregate: &Aggregate, sequence_sum: &mut f32) -> Option<f32> {
+    pub fn enqueue_for_moving_average(&self, aggregate: Aggregate, sequence_sum: &mut f32) -> Option<f32> {
 
         let current_size: usize = self.data.borrow().len();
 
@@ -45,7 +45,7 @@ impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
         }
     }
 
-    pub fn enqueue_for_rate_of_change(&self, aggregate: &Aggregate) -> Option<f32> {
+    pub fn enqueue_for_rate_of_change(&self, aggregate: Aggregate) -> Option<f32> {
 
         let dequeued = self.enqueue(aggregate);
 
@@ -79,7 +79,7 @@ mod moving_average_tests {
         // Act
         for datum in market {
 
-            moving_average = seq.enqueue_for_moving_average(&datum, &mut ma_sum);
+            moving_average = seq.enqueue_for_moving_average(datum, &mut ma_sum);
         }
 
         // Assert
@@ -99,7 +99,7 @@ mod moving_average_tests {
         // Act
         for datum in market {
 
-            moving_average = seq.enqueue_for_moving_average(&datum, &mut ma_sum);
+            moving_average = seq.enqueue_for_moving_average(datum, &mut ma_sum);
         }
 
         // Assert
@@ -119,7 +119,7 @@ mod moving_average_tests {
         // Act
         for datum in market {
 
-            moving_average = seq.enqueue_for_moving_average(&datum, &mut ma_sum);
+            moving_average = seq.enqueue_for_moving_average(datum, &mut ma_sum);
         }
 
         // Assert
@@ -147,7 +147,7 @@ mod rate_of_change_tests {
         // Act
         for datum in market {
 
-            rate_of_change = seq.enqueue_for_rate_of_change(&datum);
+            rate_of_change = seq.enqueue_for_rate_of_change(datum);
         }
 
         // Assert
@@ -166,7 +166,7 @@ mod rate_of_change_tests {
         // Act
         for datum in market {
 
-            rate_of_change = seq.enqueue_for_rate_of_change(&datum);
+            rate_of_change = seq.enqueue_for_rate_of_change(datum);
         }
 
         // Assert
@@ -185,7 +185,7 @@ mod rate_of_change_tests {
         // Act
         for datum in market {
 
-            rate_of_change = seq.enqueue_for_rate_of_change(&datum);
+            rate_of_change = seq.enqueue_for_rate_of_change(datum);
         }
 
         // Assert
@@ -204,7 +204,7 @@ mod rate_of_change_tests {
         // Act
         for datum in market {
 
-            rate_of_change = seq.enqueue_for_rate_of_change(&datum);
+            rate_of_change = seq.enqueue_for_rate_of_change(datum);
         }
 
         // Assert

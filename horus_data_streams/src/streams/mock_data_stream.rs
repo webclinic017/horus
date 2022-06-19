@@ -9,8 +9,9 @@ pub struct MockDataStream<DATATYPE> {
     pub on_data: Weak<dyn Fn()>
 }
 
-impl<DATATYPE> MockDataStream<DATATYPE> {
+impl<DATATYPE> MockDataStream<DATATYPE> where DATATYPE: Copy {
     pub fn inject(&self, datum: DATATYPE) {
+        self.sequence.enqueue(datum);
         match self.on_data.upgrade() {
             Some(action) => action(),
             None => {}
@@ -23,11 +24,11 @@ impl<DATATYPE> DataStream<DATATYPE> for MockDataStream<DATATYPE> {
         panic!("This method is not available for this mocking class")
     }
 
-    fn add_middleware(&self, on_data: &dyn Fn()) {
+    fn add_middleware(&self, _on_data: &dyn Fn()) {
         todo!()
     }
 
-    fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> Vec<DATATYPE> {
+    fn get_historical_data(&self, _start: chrono::DateTime<chrono::Utc>, _end: chrono::DateTime<chrono::Utc>) -> Vec<DATATYPE> {
         panic!("This method is not available for this mocking class")
     }
 }

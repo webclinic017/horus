@@ -1,5 +1,3 @@
-use std::rc::Weak;
-
 use chrono::{DateTime, Utc};
 
 pub trait DataStream<DATATYPE> {
