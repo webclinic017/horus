@@ -1,3 +1,3 @@
-pub trait TimeSeriesElement + Copy {
+pub trait TimeSeriesElement {
     
 }

@@ -30,7 +30,7 @@ impl PartialOrd for BacktestResult {
     }
 }
 
-pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, simulation: BacktestSimulation, streams: &Vec<MockDataStream<Box<dyn TimeSeriesElement>>>, adapter: &TestMarketAdapter) -> BacktestResult {
+pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, simulation: &mut BacktestSimulation, streams: &Vec<MockDataStream<Box<dyn TimeSeriesElement>>>, adapter: &TestMarketAdapter) -> BacktestResult {
 
     // SETUP
     adapter.set_initial_state();

@@ -4,12 +4,11 @@ use crate::simulation_element::SimulationElement;
 
 pub struct BacktestSimulation<'a> {
     time_series_elements: Vec<SimulationElement<'a, Box<dyn TimeSeriesElement>>>,
-    index: usize
 }
 
 impl<'a> BacktestSimulation<'a> {
-    pub fn run(&self) {
-        for element in &self.time_series_elements {
+    pub fn run(&mut self) {
+        for element in self.time_series_elements.drain(..) {
             element.stream.inject(element.datum);
         }
     }

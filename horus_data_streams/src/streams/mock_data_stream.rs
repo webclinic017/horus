@@ -9,7 +9,7 @@ pub struct MockDataStream<DATATYPE> {
     pub on_data: Weak<dyn Fn()>
 }
 
-impl<DATATYPE> MockDataStream<DATATYPE> where DATATYPE: Copy {
+impl<DATATYPE> MockDataStream<DATATYPE> {
     pub fn inject(&self, datum: DATATYPE) {
         self.sequence.enqueue(datum);
         match self.on_data.upgrade() {
