@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use horus_data_streams::streams::{data_stream::DataStream, mock_data_stream::MockDataStream};
 use horus_finance::time_series_element::TimeSeriesElement;
 use horus_strategies::strategies::strategy::Strategy;
@@ -30,14 +32,17 @@ impl PartialOrd for BacktestResult {
     }
 }
 
-pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, simulation: &mut BacktestSimulation, streams: &Vec<MockDataStream<Box<dyn TimeSeriesElement>>>, adapter: &TestMarketAdapter) -> BacktestResult {
+pub fn run_backtest<STRATEGY: Strategy>(strategy: &STRATEGY, simulation: &mut BacktestSimulation, streams: &Vec<MockDataStream<Box<dyn TimeSeriesElement>, 2>>, adapter: &TestMarketAdapter) -> BacktestResult {
 
     // SETUP
     adapter.set_initial_state();
 
-    for stream in streams {
-        stream.add_middleware(&||{ strategy.run_hot_path() });
-    }
+    // for stream in streams {
+    //     // let hot_path_ref = Rc::new(||{strategy.run_hot_path()});
+    //     // let gg = Rc::downgrade(&hot_path_ref);
+    //     adapter.
+    //     stream.set_on_data(hot_path_ref);
+    // }
 
     // RUN TESTS
     simulation.run();

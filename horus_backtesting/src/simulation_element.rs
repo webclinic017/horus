@@ -3,5 +3,5 @@ use horus_finance::time_series_element::TimeSeriesElement;
 
 pub struct SimulationElement<'a, DATATYPE> {
     pub datum: DATATYPE,
-    pub stream: &'a MockDataStream<Box<dyn TimeSeriesElement>>
+    pub stream: &'a MockDataStream<Box<dyn TimeSeriesElement>, 2>
 }

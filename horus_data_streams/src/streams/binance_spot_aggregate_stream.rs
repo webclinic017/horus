@@ -1,4 +1,4 @@
-use std::{sync::atomic::AtomicBool, cell::RefCell, rc::Weak};
+use std::{sync::atomic::AtomicBool, cell::RefCell, rc::{Weak, Rc}};
 
 use horus_finance::aggregate::Aggregate;
 use binance::{websockets::*, market::Market, api::Binance};
@@ -9,7 +9,7 @@ pub struct BinanceSpotAggregateStream {
     market: Market,
     symbol: String,
     interval: String,
-    middleware: RefCell<Vec<Weak<dyn Fn(&str, Aggregate)>>>
+    on_data: Option<RefCell<Weak<dyn Fn()>>>
 }
 
 impl BinanceSpotAggregateStream {
@@ -18,7 +18,7 @@ impl BinanceSpotAggregateStream {
             market: Binance::new(None, None),
             symbol,
             interval,
-            middleware: RefCell::new(Vec::new())
+            on_data: None
         }
     }
 }
@@ -26,17 +26,16 @@ impl BinanceSpotAggregateStream {
 impl DataStream<Aggregate> for BinanceSpotAggregateStream {
     fn start_listening(&self) {
             let keep_running = AtomicBool::new(true);
+            let hot_path = self.on_data.as_ref().unwrap().borrow();
+            let rc = hot_path.upgrade().unwrap();
             let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
                 if let WebsocketEvent::Kline(kline_event) = event {
                     let new_aggregate = Aggregate {
                         open: kline_event.kline.open.parse::<f32>().unwrap(),
                         close: kline_event.kline.close.parse::<f32>().unwrap()
                     };
-                    let middleware_ref = self.middleware.borrow();
-                    for mw in middleware_ref.iter() {
-                        let rc = mw.upgrade().unwrap();
-                        rc("binance", new_aggregate);
-                    }
+                    //todo enqueue
+                    rc();
                 }
                 Ok(())
             });
@@ -46,8 +45,9 @@ impl DataStream<Aggregate> for BinanceSpotAggregateStream {
         web_socket.event_loop(&keep_running).unwrap();
     }
 
-    fn add_middleware(&self, on_data: &dyn Fn()) {
-        todo!();
+    fn set_on_data(&self, _on_data: Rc<dyn Fn()>) {
+        let mut mut_ref = self.on_data.as_ref().unwrap().borrow_mut();
+        *mut_ref = Rc::downgrade(&_on_data);
     }
 
     fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> Vec<Aggregate> {
