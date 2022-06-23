@@ -16,13 +16,15 @@ use horus_strategies::strategies::{inter_market_arbitrage::InterMarketArbitrageS
 //     let bitfinex_spot = BitfinexSpotMarketConnector::new("BTCEUR".to_string(), "5m".to_string(), &|_a| {});
 //     let mock_market_01 = MockMarketConnector::new(1000.);
 //     let mock_market_02 = MockMarketConnector::new(0.);
-//     let stream_01 = MockMarketSnapshotDataReceiver::new();
-//     let stream_02 = MockMarketSnapshotDataReceiver::new();
+//     let historical_01 = get_historical_01();
+//     let historical_02 = get_historical_01();
 //     stream_01.add_listener(|snapshot: MarketSnapshot| { mock_market_01.inject_snapshot(snapshot) });
 //     let test_adapter = TestMarketAdapter::new();
-    
 //     test_adapter.add_receiver(stream_01);
 //     test_adapter.add_receiver(stream_02);
+//     let simulation_elements_01 = build_simluation(&binance_spot, &mock_market_01, historical_01);
+//     let simulation_elements_02 = build_simluation(&bitfinex_spot, &mock_market_02, historical_02);
+//     let simulation = merge();
 //     let strategy = InterMarketArbitrageStrategy::<MockMarketReceiver, MockMarketConnector>::new(&mock_market_01, &mock_market_02);
 
 //     //2. Describe Simulation
