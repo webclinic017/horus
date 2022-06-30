@@ -42,6 +42,7 @@ This project has a huge focus on performance and reliability. The trading agents
 ### Datastreams
 - Implement a mechanism for getting more historical data in a safe way
 - Create a service for local caching of historical market data with Redis time series
+- Streams should only calculate the needed signals when receiving a new item. This is know at compile time
 
 ### Terminal
 - Migrate the entire C# Horus Terminal

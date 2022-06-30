@@ -3,127 +3,113 @@ use std::cell::RefCell;
 use heapless::spsc::Queue;
 use horus_finance::aggregate::Aggregate;
 
-use super::sequence::Sequence;
-
-impl<const SIZE: usize> Sequence<Aggregate, SIZE> {
-    pub fn new() -> Sequence<Aggregate, SIZE> {
-        Sequence{
-            data: RefCell::new(Queue::new())
-        }
-    }
-
-    // pub fn enqueue(&self, aggregate: &Aggregate) -> Option<Aggregate> {
-
-    //     let mut dequeued: Option<Aggregate> = None;
-    //     if self.data.borrow().is_full() {
-    //         dequeued = self.data.borrow_mut().dequeue();
-    //     }
-
-    //     self.data.borrow_mut().enqueue(*aggregate).unwrap();
-
-    //     dequeued
-    // }
-
-    pub fn enqueue_for_moving_average(&self, aggregate: Aggregate, sequence_sum: &mut f32) -> Option<f32> {
-
-        let current_size: usize = self.data.borrow().len();
-
-        let is_ready = current_size >= SIZE - 1;
-
-        let dequeued = self.enqueue(aggregate);
-
-        *sequence_sum += aggregate.close;
-
-        if let Some(removed_agg) = dequeued {
-            *sequence_sum -= removed_agg.close;
-        }
-
-        if is_ready {
-            Some(*sequence_sum / (SIZE - 1) as f32)
-        } else {
-            None
-        }
-    }
-
-    pub fn enqueue_for_rate_of_change(&self, aggregate: Aggregate) -> Option<f32> {
-
-        let dequeued = self.enqueue(aggregate);
-
-        dequeued.map(|deq| (aggregate.close - deq.close) * 100. / deq.close)
-    }
+pub struct AggregateSequence<const SIZE: usize> {
+    data: RefCell<Queue<Aggregate, SIZE>>,
+    sequence_sum: f32,
+    pub moving_average: Option<f32>,
+    pub rate_of_change: Option<f32>,
 }
 
-impl<const SIZE: usize> Default for Sequence<Aggregate, SIZE> {
-    fn default() -> Self {
-        Self::new()
+impl<const SIZE: usize> AggregateSequence<SIZE> {
+    pub fn new() -> AggregateSequence<SIZE> {
+        AggregateSequence{
+            data: RefCell::new(Queue::new()),
+            sequence_sum: 0.,
+            moving_average: None,
+            rate_of_change: None
+        }
+    }
+
+    pub fn enqueue(&mut self, new_aggregate: Aggregate) {
+
+        let mut dequeued: Option<Aggregate> = None;
+        if self.data.borrow().is_full() {
+            dequeued = self.data.borrow_mut().dequeue();
+        }
+
+        let _ = self.data.borrow_mut().enqueue(new_aggregate);
+
+        self.calculate_moving_average(new_aggregate, dequeued);
+        self.calculate_rate_of_change(new_aggregate, dequeued);
+    }
+
+    fn calculate_moving_average(&mut self, new_aggregate: Aggregate, dequeued: Option<Aggregate>) {
+
+        self.sequence_sum += new_aggregate.close;
+
+        if let Some(removed_agg) = dequeued {
+            self.sequence_sum -= removed_agg.close;
+            self.moving_average = Some(self.sequence_sum / (SIZE - 1) as f32);
+        }
+
+        self.moving_average = None;
+    }
+
+    fn calculate_rate_of_change(&mut self, new_aggregate: Aggregate, dequeued: Option<Aggregate>) {
+
+        match dequeued {
+            Some(deq) => {
+                let roc = (new_aggregate.close - deq.close) * 100. / deq.close;
+                self.rate_of_change = Some(roc);
+            },
+            _ => { self.rate_of_change = None; }
+        }
     }
 }
 
 #[cfg(test)]
 mod moving_average_tests {
 
-    use horus_finance::aggregate::Aggregate;
-
-    use crate::sequences::{sequence::Sequence, aggregate_sequence::test_sequences::{create_linear_growing_market, create_moving_market, create_stable_market}};
+    use crate::sequences::aggregate_sequence::{test_sequences::{create_linear_growing_market, create_moving_market, create_stable_market}, AggregateSequence};
 
     #[test]
     fn should_compute_correct_moving_average_in_stable_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 7>::new();
+        let mut seq = AggregateSequence::<7>::new();
         let market = create_stable_market();
-        let mut ma_sum: f32 = 0.;
-
-        let mut moving_average: Option<f32> = None;
         
         // Act
         for datum in market {
-
-            moving_average = seq.enqueue_for_moving_average(datum, &mut ma_sum);
+            seq.enqueue(datum);
         }
 
         // Assert
-        assert_eq!(Some(10.), moving_average);
+        assert_eq!(Some(10.), seq.moving_average);
     }
 
     #[test]
     fn should_compute_correct_moving_average_in_growing_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 5>::new();
+        let mut seq = AggregateSequence::<5>::new();
         let market = create_linear_growing_market();
-        let mut ma_sum: f32 = 0.;
-
-        let mut moving_average: Option<f32> = None;
         
         // Act
         for datum in market {
 
-            moving_average = seq.enqueue_for_moving_average(datum, &mut ma_sum);
+            seq.enqueue(datum);
         }
 
         // Assert
-        assert_eq!(Some(8.5), moving_average);
+        assert_eq!(Some(8.5), seq.moving_average);
     }
 
     #[test]
     fn should_compute_correct_moving_average_in_moving_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 5>::new();
+        let mut seq = AggregateSequence::<5>::new();
         let market = create_moving_market();
-        let mut ma_sum: f32 = 0.;
-
-        let mut moving_average: Option<f32> = None;
         
         // Act
         for datum in market {
 
-            moving_average = seq.enqueue_for_moving_average(datum, &mut ma_sum);
+            seq.enqueue(datum);
         }
 
         // Assert
-        assert_eq!(Some(4.5), moving_average);
+        assert_eq!(Some(4.5), seq.moving_average);
     }
 }
 
@@ -131,84 +117,75 @@ mod moving_average_tests {
 mod rate_of_change_tests {
 
     use float_cmp::approx_eq;
-    use horus_finance::aggregate::Aggregate;
 
-    use crate::sequences::{sequence::Sequence, aggregate_sequence::test_sequences::{create_stable_market, create_linear_growing_market, create_linear_falling_market, create_moving_market}};
+    use crate::sequences::aggregate_sequence::{test_sequences::{create_linear_growing_market, create_linear_falling_market, create_moving_market, create_stable_market}, AggregateSequence};
 
     #[test]
     fn should_compute_correct_rate_of_change_in_stable_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 8>::new();
+        let mut seq = AggregateSequence::<8>::new();
         let market = create_stable_market();
-
-        let mut rate_of_change: Option<f32> = None;
         
         // Act
         for datum in market {
 
-            rate_of_change = seq.enqueue_for_rate_of_change(datum);
+            seq.enqueue(datum);
         }
 
         // Assert
-        assert_eq!(Some(0.), rate_of_change);
+        assert_eq!(Some(0.), seq.rate_of_change);
     }
 
     #[test]
     fn should_compute_correct_rate_of_change_in_linear_growing_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 5>::new();
+        let mut seq = AggregateSequence::<5>::new();
         let market = create_linear_growing_market();
-
-        let mut rate_of_change: Option<f32> = None;
         
         // Act
         for datum in market {
 
-            rate_of_change = seq.enqueue_for_rate_of_change(datum);
+            seq.enqueue(datum);
         }
 
         // Assert
-        assert!( approx_eq!(f32, 66.6666666, rate_of_change.unwrap(), ulps = 2) );
+        assert!( approx_eq!(f32, 66.6666666, seq.rate_of_change.unwrap(), ulps = 2) );
     }
 
     #[test]
     fn should_compute_correct_rate_of_change_in_linear_falling_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 5>::new();
+        let mut seq = AggregateSequence::<5>::new();
         let market = create_linear_falling_market();
-
-        let mut rate_of_change: Option<f32> = None;
         
         // Act
         for datum in market {
 
-            rate_of_change = seq.enqueue_for_rate_of_change(datum);
+            seq.enqueue(datum);
         }
 
         // Assert
-        assert!( approx_eq!(f32, -80.00, rate_of_change.unwrap(), ulps = 2) );
+        assert!( approx_eq!(f32, -80.00, seq.rate_of_change.unwrap(), ulps = 2) );
     }
 
     #[test]
     fn should_compute_correct_rate_of_change_in_moving_market() {
 
         // Arrange
-        let seq = Sequence::<Aggregate, 4>::new();
+        let mut seq = AggregateSequence::<4>::new();
         let market = create_moving_market();
-
-        let mut rate_of_change: Option<f32> = None;
         
         // Act
         for datum in market {
 
-            rate_of_change = seq.enqueue_for_rate_of_change(datum);
+            seq.enqueue(datum);
         }
 
         // Assert
-        assert!( approx_eq!(f32, 100.00, rate_of_change.unwrap(), ulps = 2) );
+        assert!( approx_eq!(f32, 100.00, seq.rate_of_change.unwrap(), ulps = 2) );
     }
  }
 

@@ -3,28 +3,32 @@ use std::{sync::atomic::AtomicBool, cell::RefCell, rc::{Weak, Rc}};
 use horus_finance::aggregate::Aggregate;
 use binance::{websockets::*, market::Market, api::Binance};
 
+use crate::sequences::aggregate_sequence::AggregateSequence;
+
 use super::data_stream::DataStream;
 
-pub struct BinanceSpotAggregateStream {
+pub struct BinanceSpotAggregateStream<const SEQ_SIZE: usize> {
     market: Market,
     symbol: String,
     interval: String,
-    on_data: Option<RefCell<Weak<dyn Fn()>>>
+    on_data: Option<RefCell<Weak<dyn Fn()>>>,
+    sequence: AggregateSequence<SEQ_SIZE>
 }
 
-impl BinanceSpotAggregateStream {
-    pub fn new(symbol: String, interval: String) -> BinanceSpotAggregateStream {
+impl<const SEQ_SIZE: usize> BinanceSpotAggregateStream<SEQ_SIZE> {
+    pub fn new(symbol: String, interval: String) -> BinanceSpotAggregateStream<SEQ_SIZE> {
         BinanceSpotAggregateStream {
             market: Binance::new(None, None),
             symbol,
             interval,
-            on_data: None
+            on_data: None,
+            sequence: AggregateSequence::<SEQ_SIZE>::new()
         }
     }
 }
 
-impl DataStream<Aggregate> for BinanceSpotAggregateStream {
-    fn start_listening(&self) {
+impl<const SEQ_SIZE: usize> DataStream<Aggregate> for BinanceSpotAggregateStream<SEQ_SIZE> {
+    fn start_listening(&mut self) {
             let keep_running = AtomicBool::new(true);
             let hot_path = self.on_data.as_ref().unwrap().borrow();
             let rc = hot_path.upgrade().unwrap();
@@ -34,7 +38,7 @@ impl DataStream<Aggregate> for BinanceSpotAggregateStream {
                         open: kline_event.kline.open.parse::<f32>().unwrap(),
                         close: kline_event.kline.close.parse::<f32>().unwrap()
                     };
-                    //todo enqueue
+                    self.sequence.enqueue(new_aggregate);
                     rc();
                 }
                 Ok(())
