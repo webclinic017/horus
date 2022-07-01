@@ -12,6 +12,8 @@ use horus_strategies::strategies::{inter_market_arbitrage::InterMarketArbitrageS
 // fn test_inter_market_arbitrage_strategy() {
 
 //     //1. Describe Strategy
+//     let binance_spot_snapshots = Arc::new(MarketSnapshotSequence::<2>::new());
+//     let bitfinex_spot_snapshots = Arc::new(MarketSnapshotSequence::<2>::new());
 //     let binance_spot = BinanceSpotAggregateReceiver::new("BTCEUR".to_string(), "5m".to_string(), &|_a| {});
 //     let bitfinex_spot = BitfinexSpotMarketConnector::new("BTCEUR".to_string(), "5m".to_string(), &|_a| {});
 //     let mock_market_01 = MockMarketConnector::new(1000.);
