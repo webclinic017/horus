@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use heapless::spsc::Queue;
 use horus_finance::market_snapshot::MarketSnapshot;
 
@@ -17,5 +15,29 @@ impl<const SIZE: usize> SnapshotSequence<SIZE> {
         }
 
         let _ = self.data.enqueue(new_snapshot);
+    }
+
+    pub fn get_current_bid(&self) -> Option<f32> {
+
+        let newest = self.data.peek();
+
+        match newest {
+            Some(newest) => {
+                Some(newest.current_bid)
+            }
+            _ => None
+        }
+    }
+
+    pub fn get_current_ask(&self) -> Option<f32> {
+
+        let newest = self.data.peek();
+
+        match newest {
+            Some(newest) => {
+                Some(newest.current_ask)
+            }
+            _ => None
+        }
     }
 } 

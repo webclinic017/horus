@@ -22,7 +22,7 @@ impl<'a, Market: MarketConnector> BuyLowSellHighStrategy<'a, Market> {
         todo!();
     }
 
-    pub fn next(&self, aggregate: Aggregate) {
+    pub fn next(&mut self, aggregate: Aggregate) {
         self.golden_cross_signal.next(aggregate);
         self.run_hot_path();
     }

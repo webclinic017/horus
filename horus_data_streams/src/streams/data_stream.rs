@@ -2,9 +2,10 @@ use std::rc::Rc;
 
 use chrono::{DateTime, Utc};
 
+use crate::models::time_series_element::TimeSeriesElement;
+
 pub trait DataStream<DATATYPE> {
 
     fn start_listening(&mut self);
-    fn set_on_data(&self, _on_data: Rc<dyn Fn()>);
-    fn get_historical_data(&self, start: DateTime<Utc>, end: DateTime<Utc>) -> Vec<DATATYPE>;
+    fn get_historical_data(&self, start: DateTime<Utc>, end: DateTime<Utc>) -> Vec<TimeSeriesElement<DATATYPE>>;
 }

@@ -1,6 +1,6 @@
 use horus_finance::aggregate::Aggregate;
 
-enum GoldenCrossSignalType {
+pub enum GoldenCrossSignalType {
     ShortCrossedLong,
     LongCrossedShort
 }

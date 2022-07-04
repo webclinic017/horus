@@ -24,14 +24,14 @@ impl<'a, ConnectorOne: MarketConnector, ConnectorTwo: MarketConnector> InterMark
 
     fn run_hot_path(&self) {
 
-        let ask_01 = self.sequence_01.newest().ask;
-        let bid_02 = self.sequence_02.newest().bid;
+        let ask_01 = self.sequence_01.get_current_ask();
+        let bid_02 = self.sequence_02.get_current_bid();
 
-        if self.bid_02 > self.ask_01 {
+        if bid_02 > ask_01 {
             let order = Order { 
                 exchange_id: "".to_string(), 
                 instrument_symbol: "".to_string(), 
-                side: horus_finance::order_side::OrderSide::SELL, 
+                side: horus_finance::order_side::OrderSide::SELL,
                 quantity: 0, 
                 price: None, 
                 expiration_date: None
@@ -41,12 +41,12 @@ impl<'a, ConnectorOne: MarketConnector, ConnectorTwo: MarketConnector> InterMark
         }
     }
 
-    pub fn seq_01_next(&self, snapshot: MarketSnapshot) {
+    pub fn seq_01_next(&mut self, snapshot: MarketSnapshot) {
         self.sequence_01.enqueue(snapshot);
         self.run_hot_path();
     }
 
-    pub fn seq_02_next(&self, snapshot: MarketSnapshot) {
+    pub fn seq_02_next(&mut self, snapshot: MarketSnapshot) {
         self.sequence_02.enqueue(snapshot);
         self.run_hot_path();
     }
