@@ -1,6 +1,5 @@
 use chrono::TimeZone;
-use horus_backtesting::{backtest_simulation::BacktestSimulation, test_market_adapter::TestMarketAdapter, run_backtest};
-use horus_data_streams::streams::{binance_futures_aggregate_stream::{BinanceSpotAggregateStream, BinanceFuturesAggregateStream}, data_stream::DataStream, mock_aggregate_stream::{MockAggregateStream, self}};
+use horus_data_streams::streams::{binance_futures_aggregate_stream::{BinanceFuturesAggregateStream}, data_stream::DataStream, mock_aggregate_stream::{MockAggregateStream, self}};
 use horus_exchanges::mock_exchange::mock_market_connector::MockMarketConnector;
 use horus_finance::{aggregate::Aggregate, market_snapshot::MarketSnapshot};
 use horus_strategies::{strategies::{inter_market_arbitrage::InterMarketArbitrageStrategy, buy_low_sell_high::BuyLowSellHighStrategy}, signals::golden_cross::{self, GoldenCrossSignal}};
@@ -50,17 +49,23 @@ fn test_blsh_strategy() {
     let historical_data = binance_spot.get_historical_data(start, end);
 
     //2. Setup
-    let mut mock_market = MockMarketConnector::new(1000.);
+    let mock_market = MockMarketConnector::new(1000.);
     let golden_cross_signal = GoldenCrossSignal {};
     let mut strategy = BuyLowSellHighStrategy::<MockMarketConnector>::new(&mock_market, &golden_cross_signal);
-    let on_data = |aggregate: Aggregate| {
-        mock_market.current_bid = aggregate.close;
-        mock_market.current_ask = aggregate.close;
+    let mut on_data = |aggregate: Aggregate| {
+        //update the mock exchange
+        let mut bid_ref = mock_market.current_bid.borrow_mut();
+        let mut ask_ref = mock_market.current_ask.borrow_mut();
+        *bid_ref = aggregate.close;
+        *ask_ref = aggregate.close;
+        mock_market.set_price(aggregate.close, aggregate.close);
+
+        //run the strategy
         strategy.next(aggregate);
     };
-    let mock_stream = MockAggregateStream::new(&on_data);
+    let mut mock_stream = MockAggregateStream::new(&mut on_data);
 
-    //3. Run
+    // //3. Run
     for datum in historical_data {
         mock_stream.inject(datum);
     }

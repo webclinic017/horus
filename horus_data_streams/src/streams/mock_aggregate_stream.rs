@@ -1,5 +1,3 @@
-use std::{rc::{Weak, Rc}, cell::RefCell};
-
 use horus_finance::aggregate::Aggregate;
 
 use crate::models::time_series_element::TimeSeriesElement;
@@ -7,19 +5,19 @@ use crate::models::time_series_element::TimeSeriesElement;
 use super::data_stream::DataStream;
 
 pub struct MockAggregateStream<'a> {
-    on_data: &'a dyn Fn(Aggregate)
+    on_data: &'a mut dyn FnMut(Aggregate)
 }
 
 impl<'a> MockAggregateStream<'a> {
 
-    pub fn new(on_data: &'a dyn Fn(Aggregate)) -> MockAggregateStream<'a> {
+    pub fn new(on_data: &'a mut dyn FnMut(Aggregate)) -> MockAggregateStream<'a> {
         MockAggregateStream {
             on_data
         }
     }
 
-    pub fn inject(&mut self, datum: Aggregate) {
-        (self.on_data)(datum);
+    pub fn inject(&mut self, datum: TimeSeriesElement<Aggregate>) {
+        (self.on_data)(datum.datum);
     }
 }
 

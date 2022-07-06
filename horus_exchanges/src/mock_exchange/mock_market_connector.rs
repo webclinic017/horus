@@ -21,17 +21,19 @@ impl MockMarketConnector {
         }
     }
 
-    pub fn inject_snapshot(&self, snapshot: MarketSnapshot) {
+    // pub fn inject_snapshot(&self, snapshot: MarketSnapshot) {
 
-        let mut mut_ref_ask = self.current_ask.borrow_mut();
+    //     let mut mut_ref_ask = self.current_ask.borrow_mut();
+    //     let mut mut_ref_bid = self.current_bid.borrow_mut();
+    //     *mut_ref_ask = snapshot.current_ask;
+    //     *mut_ref_bid = snapshot.current_bid;
+    // }
+
+    pub fn set_price(&self, bid: f32, ask: f32) {
         let mut mut_ref_bid = self.current_bid.borrow_mut();
-        *mut_ref_ask = snapshot.current_ask;
-        *mut_ref_bid = snapshot.current_bid;
-    }
-
-    pub fn inject_aggregate(&self, order: Aggregate) {
         let mut mut_ref_ask = self.current_ask.borrow_mut();
-        *mut_ref_ask = order.close;
+        *mut_ref_bid = bid;
+        *mut_ref_ask = ask;
     }
 
     pub fn get_current_ask(&self) -> f32 {
