@@ -9,5 +9,5 @@ members = [
     "horus_strategies",
     "horus_autoquant",
     "horus_agent",
-    "horus_terminal"
+    "horus_terminal/src-tauri"
 ]
