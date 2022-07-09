@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use chrono::{DateTime, Utc};
 
 use crate::models::time_series_element::TimeSeriesElement;

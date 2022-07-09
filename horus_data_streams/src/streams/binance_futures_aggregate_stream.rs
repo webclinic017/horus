@@ -1,10 +1,10 @@
-use std::{sync::{atomic::AtomicBool, Mutex}, cell::RefCell, rc::{Weak, Rc}};
+use std::sync::atomic::AtomicBool;
 
 use chrono::{NaiveDateTime, DateTime, Utc};
 use horus_finance::aggregate::Aggregate;
 use binance::{websockets::*, market::Market, api::Binance};
 
-use crate::{sequences::aggregate_sequence::AggregateSequence, models::time_series_element::TimeSeriesElement};
+use crate::models::time_series_element::TimeSeriesElement;
 
 use super::data_stream::DataStream;
 

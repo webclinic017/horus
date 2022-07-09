@@ -9,10 +9,10 @@ impl<const SIZE: usize> SnapshotSequence<SIZE> {
     
     pub fn enqueue(&mut self, new_snapshot: MarketSnapshot) {
 
-        let mut dequeued: Option<MarketSnapshot> = None;
-        if self.data.is_full() {
-            dequeued = self.data.dequeue();
-        }
+        // let mut dequeued: Option<MarketSnapshot> = None;
+        // if self.data.is_full() {
+        //     dequeued = self.data.dequeue();
+        // }
 
         let _ = self.data.enqueue(new_snapshot);
     }
