@@ -29,8 +29,6 @@ impl<'a, ConnectorOne: MarketConnector, ConnectorTwo: MarketConnector> InterMark
 
         if bid_02 > ask_01 {
             let order = Order { 
-                exchange_id: "".to_string(), 
-                instrument_symbol: "".to_string(), 
                 side: horus_finance::order_side::OrderSide::SELL,
                 quantity: 0, 
                 price: None, 

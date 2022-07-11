@@ -1,5 +1,5 @@
 use horus_exchanges::connectors::market_connector::MarketConnector;
-use horus_finance::aggregate::Aggregate;
+use horus_finance::{aggregate::Aggregate, order::Order, order_side::OrderSide};
 
 use crate::signals::golden_cross::{GoldenCrossSignal, GoldenCrossSignalType};
 
@@ -18,17 +18,25 @@ impl<'a, Market: MarketConnector> BuyLowSellHighStrategy<'a, Market> {
         }
     }
 
-    fn run_hot_path(&self) {
-        todo!();
-    }
-
     pub fn next(&mut self, aggregate: Aggregate) {
         let result = self.golden_cross_signal.next(aggregate);
         if result == Some(GoldenCrossSignalType::LongOvertakes) {
-            println!("SELL!");
+            let order = Order { 
+                side: OrderSide::SELL, 
+                quantity: 1, 
+                price: None, 
+                expiration_date: None 
+            };
+            self.market.route_take_order(&order);
         }
         if result == Some(GoldenCrossSignalType::ShortOvertakes) {
-            println!("BUY!");
+            let order = Order { 
+                side: OrderSide::BUY, 
+                quantity: 1, 
+                price: None, 
+                expiration_date: None 
+            };
+            self.market.route_take_order(&order);
         }
     }
 }

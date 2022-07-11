@@ -1,8 +1,8 @@
 use chrono::TimeZone;
-use horus_data_streams::streams::{binance_futures_aggregate_stream::{BinanceFuturesAggregateStream}, data_stream::DataStream, mock_aggregate_stream::{MockAggregateStream, self}};
+use horus_data_streams::{streams::{binance_futures_aggregate_stream::{BinanceFuturesAggregateStream}, data_stream::DataStream, mock_aggregate_stream::MockAggregateStream}, models::time_series_element::TimeSeriesElement};
 use horus_exchanges::mock_exchange::mock_market_connector::MockMarketConnector;
 use horus_finance::{aggregate::Aggregate, market_snapshot::MarketSnapshot};
-use horus_strategies::{strategies::{inter_market_arbitrage::InterMarketArbitrageStrategy, buy_low_sell_high::BuyLowSellHighStrategy}, signals::golden_cross::{self, GoldenCrossSignal}};
+use horus_strategies::strategies::{inter_market_arbitrage::InterMarketArbitrageStrategy, buy_low_sell_high::BuyLowSellHighStrategy};
 
 // fn test_twitter_strategy() {
     
@@ -40,16 +40,10 @@ fn test_inter_market_arbitrage_strategy() {
 //     todo!()
 }
 
-fn test_blsh_strategy() {
+fn test_blsh_strategy(historical_data: Vec<TimeSeriesElement<Aggregate>>, initial_cash_balance: f32) {
 
-    //1. Get Historical
-    let binance_spot = BinanceFuturesAggregateStream::new(&|_|{}, "BTCEUR".to_string(), "5m".to_string());
-    let start = chrono::Utc.ymd(2015, 1, 1).and_hms(0, 0, 0);
-    let end = chrono::Utc::now();
-    let historical_data = binance_spot.get_historical_data(start, end);
-
-    //2. Setup
-    let mock_market = MockMarketConnector::new(1000.);
+    //1. Setup
+    let mock_market = MockMarketConnector::new(initial_cash_balance);
     let mut strategy = BuyLowSellHighStrategy::<MockMarketConnector>::new(&mock_market);
     let mut on_data = |aggregate: Aggregate| {
         //update the mock exchange
@@ -60,16 +54,23 @@ fn test_blsh_strategy() {
     };
     let mut mock_stream = MockAggregateStream::new(&mut on_data);
 
-    // //3. Run
+    //2. Run
     for datum in historical_data {
         mock_stream.inject(datum);
     }
 
-    //4. Report
-    todo!()
+    //3. Report
+    let alpha = (mock_market.get_cash_balance() / initial_cash_balance - 1.) * 100.;
+    println!("Alpha: {}%", alpha);
 }
 
 fn main() {
-    test_blsh_strategy();
+    let binance_spot = BinanceFuturesAggregateStream::new(&|_|{}, "BTCEUR".to_string(), "5m".to_string());
+    let start = chrono::Utc.ymd(2015, 1, 1).and_hms(0, 0, 0);
+    let end = chrono::Utc::now();
+    let historical_data = binance_spot.get_historical_data(start, end);
+
+    test_blsh_strategy(historical_data, 1000.);
+
     // test_inter_market_arbitrage_strategy();
 }
