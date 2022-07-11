@@ -1,20 +1,20 @@
 use horus_exchanges::connectors::market_connector::MarketConnector;
 use horus_finance::aggregate::Aggregate;
 
-use crate::signals::golden_cross::GoldenCrossSignal;
+use crate::signals::golden_cross::{GoldenCrossSignal, GoldenCrossSignalType};
 
 use super::strategy::Strategy;
 
 pub struct BuyLowSellHighStrategy<'a, Market: MarketConnector> {
     market: &'a Market,
-    golden_cross_signal: &'a GoldenCrossSignal<20, 200>
+    golden_cross_signal: GoldenCrossSignal<20, 200>
 }
 
 impl<'a, Market: MarketConnector> BuyLowSellHighStrategy<'a, Market> {
-    pub fn new(market: &'a Market, signal: &'a GoldenCrossSignal<20, 200>) -> BuyLowSellHighStrategy<'a, Market> {
+    pub fn new(market: &'a Market) -> BuyLowSellHighStrategy<'a, Market> {
         BuyLowSellHighStrategy {
             market,
-            golden_cross_signal: signal
+            golden_cross_signal: GoldenCrossSignal::<20, 200>::new()
         }
     }
 
@@ -23,8 +23,13 @@ impl<'a, Market: MarketConnector> BuyLowSellHighStrategy<'a, Market> {
     }
 
     pub fn next(&mut self, aggregate: Aggregate) {
-        self.golden_cross_signal.next(aggregate);
-        self.run_hot_path();
+        let result = self.golden_cross_signal.next(aggregate);
+        if result == Some(GoldenCrossSignalType::LongOvertakes) {
+            println!("SELL!");
+        }
+        if result == Some(GoldenCrossSignalType::ShortOvertakes) {
+            println!("BUY!");
+        }
     }
 }
 

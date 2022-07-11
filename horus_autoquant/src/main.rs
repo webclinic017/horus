@@ -50,14 +50,9 @@ fn test_blsh_strategy() {
 
     //2. Setup
     let mock_market = MockMarketConnector::new(1000.);
-    let golden_cross_signal = GoldenCrossSignal {};
-    let mut strategy = BuyLowSellHighStrategy::<MockMarketConnector>::new(&mock_market, &golden_cross_signal);
+    let mut strategy = BuyLowSellHighStrategy::<MockMarketConnector>::new(&mock_market);
     let mut on_data = |aggregate: Aggregate| {
         //update the mock exchange
-        let mut bid_ref = mock_market.current_bid.borrow_mut();
-        let mut ask_ref = mock_market.current_ask.borrow_mut();
-        *bid_ref = aggregate.close;
-        *ask_ref = aggregate.close;
         mock_market.set_price(aggregate.close, aggregate.close);
 
         //run the strategy
