@@ -1,18 +1,19 @@
 use horus_exchanges::connectors::market_connector::MarketConnector;
 use horus_finance::{aggregate::Aggregate, order::Order, order_side::OrderSide};
+use horus_reporters::reporter::Reporter;
 
 use crate::signals::golden_cross::{GoldenCrossSignal, GoldenCrossSignalType};
 
 use super::strategy::Strategy;
 
-pub struct BuyLowSellHighStrategy<'a, Market: MarketConnector, Reporter: Reporter> {
+pub struct BuyLowSellHighStrategy<'a, Market: MarketConnector, Rep: Reporter> {
     market: &'a Market,
-    reporter: &'a Reporter,
+    reporter: &'a Rep,
     golden_cross_signal: GoldenCrossSignal<20, 200>
 }
 
-impl<'a, Market: MarketConnector, Reporter: Reporter> BuyLowSellHighStrategy<'a, Market, Reporter> {
-    pub fn new(market: &'a Market, reporter: &'a Reporter) -> BuyLowSellHighStrategy<'a, Market> {
+impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Market, Rep> {
+    pub fn new(market: &'a Market, reporter: &'a Rep) -> BuyLowSellHighStrategy<'a, Market, Rep> {
         BuyLowSellHighStrategy {
             market,
             reporter,
@@ -30,6 +31,10 @@ impl<'a, Market: MarketConnector, Reporter: Reporter> BuyLowSellHighStrategy<'a,
                 expiration_date: None 
             };
             let success = self.market.route_take_order(&order);
+            if success {
+                &self.reporter.report(&order);
+            }
+
         }
         if result == Some(GoldenCrossSignalType::ShortOvertakes) {
             let order = Order { 
@@ -43,7 +48,7 @@ impl<'a, Market: MarketConnector, Reporter: Reporter> BuyLowSellHighStrategy<'a,
     }
 }
 
-impl<'a, Market: MarketConnector> Strategy for BuyLowSellHighStrategy<'a, Market> {
+impl<'a, Market: MarketConnector, Rep: Reporter> Strategy for BuyLowSellHighStrategy<'a, Market, Rep> {
     
     fn get_name() -> &'static str {
         return "Buy Low Sell High";

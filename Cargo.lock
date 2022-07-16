@@ -565,6 +565,7 @@ dependencies = [
  "horus_data_streams",
  "horus_exchanges",
  "horus_finance",
+ "horus_reporters",
  "ta",
 ]
 

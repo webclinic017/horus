@@ -8,6 +8,7 @@ edition = "2021"
 horus_finance = { path = "../horus_finance" }
 horus_data_streams = { path = "../horus_data_streams" }
 horus_exchanges = { path = "../horus_exchanges" }
+horus_reporters = { path = "../horus_reporters" }
 
 # EXTERNAL
 ta = "0.5.0"
