@@ -1,0 +1,8 @@
+[package]
+name = "horus_reporters"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# INTERNAL
+horus_finance = { path = "../horus_finance" }

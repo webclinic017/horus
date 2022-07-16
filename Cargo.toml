@@ -5,8 +5,9 @@ members = [
     "horus_finance",
     "horus_data_streams",
     "horus_exchanges",
-    "horus_backtesting",
+    "horus_reporters",
     "horus_strategies",
+    "horus_backtesting",
     "horus_autoquant",
     "horus_agent",
     # "horus_terminal/src-tauri"

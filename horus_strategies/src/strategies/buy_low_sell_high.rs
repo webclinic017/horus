@@ -5,15 +5,17 @@ use crate::signals::golden_cross::{GoldenCrossSignal, GoldenCrossSignalType};
 
 use super::strategy::Strategy;
 
-pub struct BuyLowSellHighStrategy<'a, Market: MarketConnector> {
+pub struct BuyLowSellHighStrategy<'a, Market: MarketConnector, Reporter: Reporter> {
     market: &'a Market,
+    reporter: &'a Reporter,
     golden_cross_signal: GoldenCrossSignal<20, 200>
 }
 
-impl<'a, Market: MarketConnector> BuyLowSellHighStrategy<'a, Market> {
-    pub fn new(market: &'a Market) -> BuyLowSellHighStrategy<'a, Market> {
+impl<'a, Market: MarketConnector, Reporter: Reporter> BuyLowSellHighStrategy<'a, Market, Reporter> {
+    pub fn new(market: &'a Market, reporter: &'a Reporter) -> BuyLowSellHighStrategy<'a, Market> {
         BuyLowSellHighStrategy {
             market,
+            reporter,
             golden_cross_signal: GoldenCrossSignal::<20, 200>::new()
         }
     }
@@ -27,7 +29,7 @@ impl<'a, Market: MarketConnector> BuyLowSellHighStrategy<'a, Market> {
                 price: None, 
                 expiration_date: None 
             };
-            self.market.route_take_order(&order);
+            let success = self.market.route_take_order(&order);
         }
         if result == Some(GoldenCrossSignalType::ShortOvertakes) {
             let order = Order { 

@@ -552,6 +552,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "horus_reporters"
+version = "0.1.0"
+dependencies = [
+ "horus_finance",
+]
+
+[[package]]
 name = "horus_strategies"
 version = "0.1.0"
 dependencies = [
