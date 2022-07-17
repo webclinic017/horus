@@ -1,31 +1,16 @@
-// fn run_inter_exchange_arbitrage_strategy() {
-    
-//     //1. Describe Strategy
-//     let binance_spot = BinanceSpotExchange::new("BTCEUR");
-//     let munich_exchange = MunichExchange::new("BTCETF");
-//     let strategy = InterExchangeStrategy<BinanceSpotExchange, MunichExchange>::new(&binance_spot, &munich_exchange);
-
-//     //2. Describe Simulation
-//     let start_date: DateTime<UTC> = "";
-//     let end_date: DateTime<UTC> = "";
-//     let historical_01 = binance_spot.get_historical_data(start_date, end_date);
-//     let historical_02 = munich_exchange.get_historical_data(start_date, end_date);
-//     let simulate_next_tick = || {
-//         //big stuff todo
-//         false
-//     };
-
-//     //3. Describe Reporters
-//     let reporter = ConsoleReporter::new();
-
-//     //4. Run
-//     strategy.run<ConsoleReporter>(&console_reporter).join().unwrap();
-
-//     let result = strategy.get_backtest_result();
-//     for r in reporters {
-//         r(&market_data, &best_strategy, &best_result);
-//     }
-// }
+use horus_data_streams::streams::{binance_futures_aggregate_stream::BinanceFuturesAggregateStream, data_stream::DataStream};
+use horus_exchanges::connectors::fake_market::FakeMarket;
+use horus_finance::aggregate::Aggregate;
+use horus_reporters::console_reporter::ConsoleReporter;
+use horus_strategies::strategies::buy_low_sell_high::BuyLowSellHighStrategy;
 
 fn main() {
+    let market_connector = FakeMarket::new();
+    let reporter = ConsoleReporter::new();
+    let mut strategy = BuyLowSellHighStrategy::new(&market_connector, reporter);
+    let mut on_data = |aggregate: Aggregate| { 
+        strategy.next(aggregate); 
+    };
+    let mut binance = BinanceFuturesAggregateStream::new(&mut on_data, "BTCEUR".to_string(), "1m".to_string());
+    binance.start_listening();
 }

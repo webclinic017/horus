@@ -12,11 +12,11 @@ pub struct BinanceFuturesAggregateStream<'a> {
     market: Market,
     symbol: String,
     interval: String,
-    on_data: &'a dyn Fn(Aggregate)
+    on_data: &'a mut dyn FnMut(Aggregate)
 }
 
 impl<'a> BinanceFuturesAggregateStream<'a> {
-    pub fn new(on_data: &'a dyn Fn(Aggregate), symbol: String, interval: String) -> BinanceFuturesAggregateStream<'a> {
+    pub fn new(on_data: &'a mut dyn FnMut(Aggregate), symbol: String, interval: String) -> BinanceFuturesAggregateStream<'a> {
         BinanceFuturesAggregateStream {
             market: Binance::new(None, None),
             symbol,

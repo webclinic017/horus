@@ -8,12 +8,12 @@ use super::strategy::Strategy;
 
 pub struct BuyLowSellHighStrategy<'a, Market: MarketConnector, Rep: Reporter> {
     market: &'a Market,
-    reporter: &'a Rep,
+    reporter: Rep,
     golden_cross_signal: GoldenCrossSignal<20, 200>
 }
 
 impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Market, Rep> {
-    pub fn new(market: &'a Market, reporter: &'a Rep) -> BuyLowSellHighStrategy<'a, Market, Rep> {
+    pub fn new(market: &'a Market, reporter: Rep) -> BuyLowSellHighStrategy<'a, Market, Rep> {
         BuyLowSellHighStrategy {
             market,
             reporter,
@@ -32,7 +32,7 @@ impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Mark
             };
             let success = self.market.route_take_order(&order);
             if success {
-                &self.reporter.report(&order);
+                self.reporter.report(&order);
             }
 
         }
@@ -43,7 +43,10 @@ impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Mark
                 price: None, 
                 expiration_date: None 
             };
-            self.market.route_take_order(&order);
+            let success = self.market.route_take_order(&order);
+            if success {
+                self.reporter.report(&order);
+            }
         }
     }
 }

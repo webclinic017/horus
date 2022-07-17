@@ -1,6 +1,7 @@
 use horus_data_streams::{streams::mock_aggregate_stream::MockAggregateStream, models::time_series_element::TimeSeriesElement};
 use horus_exchanges::mock_exchange::mock_market_connector::MockMarketConnector;
 use horus_finance::aggregate::Aggregate;
+use horus_reporters::void_reporter::VoidReporter;
 use horus_strategies::strategies::buy_low_sell_high::BuyLowSellHighStrategy;
 
 use crate::backtest_report::BacktestReport;
@@ -9,7 +10,7 @@ pub fn test_blsh_strategy(historical_data: Vec<TimeSeriesElement<Aggregate>>, in
 
     //1. Setup
     let mock_market = MockMarketConnector::new(initial_cash_balance);
-    let mut strategy = BuyLowSellHighStrategy::<MockMarketConnector>::new(&mock_market);
+    let mut strategy = BuyLowSellHighStrategy::<MockMarketConnector, VoidReporter>::new(&mock_market, VoidReporter{});
     let mut on_data = |aggregate: Aggregate| {
         //update the mock exchange
         mock_market.set_price(aggregate.close, aggregate.close);

@@ -12,3 +12,4 @@ horus_reporters = { path = "../horus_reporters" }
 
 # EXTERNAL
 ta = "0.5.0"
+rand = "0.8"

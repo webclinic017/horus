@@ -490,6 +490,7 @@ dependencies = [
  "horus_data_streams",
  "horus_exchanges",
  "horus_finance",
+ "horus_reporters",
  "horus_strategies",
 ]
 
@@ -514,6 +515,7 @@ dependencies = [
  "horus_data_streams",
  "horus_exchanges",
  "horus_finance",
+ "horus_reporters",
  "horus_strategies",
 ]
 
@@ -566,6 +568,7 @@ dependencies = [
  "horus_exchanges",
  "horus_finance",
  "horus_reporters",
+ "rand",
  "ta",
 ]
 
