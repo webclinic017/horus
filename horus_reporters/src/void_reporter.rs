@@ -1,9 +1,11 @@
+use horus_finance::position::Position;
+
 use crate::reporter::Reporter;
 
 pub struct VoidReporter {}
 
 impl Reporter for VoidReporter {
-    fn report(&self, _order: &horus_finance::order::Order) {
+    fn add_position(&mut self, _order: &Position) {
         
     }
 }

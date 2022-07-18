@@ -1,14 +1,15 @@
 use std::cell::RefCell;
+use smartstring::{alias::String, LazyCompact, SmartString};
 
-use horus_finance::{aggregate::Aggregate, order::Order, order_side::OrderSide, market_snapshot::MarketSnapshot};
+use horus_finance::{aggregate::Aggregate, order::Order, order_side::OrderSide, market_snapshot::MarketSnapshot, position::Position};
 
 use crate::connectors::market_connector::MarketConnector;
 
 pub struct MockMarketConnector {
     pub current_ask: RefCell<f32>,
     pub current_bid: RefCell<f32>,
-    pub asset_balance: RefCell<usize>,
-    pub cash_balance: RefCell<f32>
+    pub cash_balance: RefCell<f32>,
+    current_position: RefCell<Option<Position>>
 }
 
 impl MockMarketConnector {
@@ -16,8 +17,8 @@ impl MockMarketConnector {
         MockMarketConnector {
             current_ask: RefCell::new(0.),
             current_bid: RefCell::new(0.),
-            asset_balance: RefCell::new(0),
-            cash_balance: RefCell::new(initial_cash_balance)
+            cash_balance: RefCell::new(initial_cash_balance),
+            current_position: RefCell::new(None)
         }
     }
 
@@ -44,99 +45,148 @@ impl MockMarketConnector {
         *self.current_bid.borrow()
     }
 
-    pub fn get_asset_balance(&self) -> usize {
-        *self.asset_balance.borrow()
-    }
-
     pub fn get_cash_balance(&self) -> f32 {
         *self.cash_balance.borrow()
+    }
+
+    pub fn get_exchange_name(&self) -> &'static SmartString<LazyCompact> {
+        let mut exchange = String::new();
+        exchange.push_str("MOCK EXCHANGE");
+        &exchange
+    }
+
+    pub fn get_market_name(&self) -> &'static SmartString<LazyCompact> {
+        let mut market = String::new();
+        market.push_str("MOCK MARKET");
+        &market
     }
 }
 
 impl MarketConnector for MockMarketConnector {
 
-    fn route_make_order(&self, order: &Order) -> bool {
+    fn route_make_order(&self, order: &Order) -> Result<Position, ()> {
         
         let mut cash_balance_ref = self.cash_balance.borrow_mut();
-        let mut asset_balance_ref = self.asset_balance.borrow_mut();
+        let mut pos_ref = self.current_position.borrow_mut();
 
         let price;
         let cash_to_transfer;
-        let lot_to_transfer;
         match order.side {
             OrderSide::BUY => {
                 price = order.price.unwrap();
                 cash_to_transfer = order.quantity as f32 * price;
 
                 if cash_to_transfer > *cash_balance_ref {
-                    return false
+                    return Err(())
                 }
 
-                lot_to_transfer = (cash_to_transfer / price).floor();
-
-                *asset_balance_ref += lot_to_transfer as usize;
                 *cash_balance_ref -= cash_to_transfer;
                 
+                let position = Position {
+                    exchange: self.get_exchange_name(),
+                    market: self.get_market_name(),
+                    quantity: order.quantity,
+                    buy_price: price,
+                    sell_price: None
+                };
+
+                *pos_ref = Some(position);
+                
+                Ok(position)
             },
             OrderSide::SELL => {
 
-                if order.quantity > *asset_balance_ref {
-                    return false;
+                if pos_ref.is_none() {
+                    return Err(())
+                }
+
+                let current_pos = pos_ref.unwrap();
+
+                if order.quantity != current_pos.quantity { // Partial fills are currently not supported
+                    return Err(())
                 }
 
                 price = order.price.unwrap();
                 cash_to_transfer = order.quantity as f32 * price;
 
-                lot_to_transfer = (cash_to_transfer / price).floor();
-
-                *asset_balance_ref -= lot_to_transfer as usize;
                 *cash_balance_ref += cash_to_transfer;
+
+                let position = Position {
+                    exchange: self.get_exchange_name(),
+                    market: self.get_market_name(),
+                    quantity: order.quantity,
+                    buy_price: current_pos.buy_price,
+                    sell_price: Some(price)
+                };
+
+                *pos_ref = None;
+
+                Ok(position)
             }
         }
-
-        true
     }
 
-    fn route_take_order(&self, order: &Order) -> bool {
+    fn route_take_order(&self, order: &Order) -> Result<Position, ()> {
         
         let mut cash_balance_ref = self.cash_balance.borrow_mut();
-        let mut asset_balance_ref = self.asset_balance.borrow_mut();
+        let mut pos_ref = self.current_position.borrow_mut();
 
         let price;
         let cash_to_transfer;
-        let lot_to_transfer;
         match order.side {
             OrderSide::BUY => {
                 price = *self.current_ask.borrow();
                 cash_to_transfer = order.quantity as f32 * price;
 
                 if cash_to_transfer > *cash_balance_ref {
-                    return false
+                    return Err(())
                 }
 
-                lot_to_transfer = (cash_to_transfer / price).floor();
-
-                *asset_balance_ref += lot_to_transfer as usize;
                 *cash_balance_ref -= cash_to_transfer;
+
+                let position = Position {
+                    exchange: self.get_exchange_name(),
+                    market: self.get_market_name(),
+                    quantity: order.quantity,
+                    buy_price: price,
+                    sell_price: None
+                };
+
+                *pos_ref = Some(position);
+
+                Ok(position)
                 
             },
             OrderSide::SELL => {
 
-                if order.quantity > *asset_balance_ref {
-                    return false;
+                if pos_ref.is_none() {
+                    return Err(())
+                }
+
+                let current_pos = pos_ref.unwrap();
+
+                if order.quantity != current_pos.quantity { // Partial fills are currently not supported
+                    return Err(())
                 }
 
                 price = *self.current_bid.borrow();
                 cash_to_transfer = order.quantity as f32 * price;
 
-                lot_to_transfer = (cash_to_transfer / price).floor();
-
-                *asset_balance_ref -= lot_to_transfer as usize;
                 *cash_balance_ref += cash_to_transfer;
+
+                let position = Position {
+                    exchange: self.get_exchange_name(),
+                    market: self.get_market_name(),
+                    quantity: order.quantity,
+                    buy_price: current_pos.buy_price,
+                    sell_price: Some(price)
+                };
+
+                *pos_ref = None;
+
+                Ok(position)
             }
         }
-
-        true
     }
 
     fn get_historical_snapshots(&self, _start: chrono::DateTime<chrono::Utc>, _end: chrono::DateTime<chrono::Utc>) -> Vec<MarketSnapshot> {

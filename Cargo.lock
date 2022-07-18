@@ -544,6 +544,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "smartstring",
 ]
 
 [[package]]
@@ -551,13 +552,16 @@ name = "horus_finance"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "smartstring",
 ]
 
 [[package]]
 name = "horus_reporters"
 version = "0.1.0"
 dependencies = [
+ "heapless",
  "horus_finance",
+ "smartstring",
 ]
 
 [[package]]
@@ -569,6 +573,7 @@ dependencies = [
  "horus_finance",
  "horus_reporters",
  "rand",
+ "smartstring",
  "ta",
 ]
 
@@ -1204,6 +1209,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eb703cfe953bccee95685111adeedb76fabe4e97549a58d16f03ea7b9367bb32"
 
 [[package]]
+name = "smartstring"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fb72c633efbaa2dd666986505016c32c3044395ceaf881518399d2f4127ee29"
+dependencies = [
+ "autocfg",
+ "static_assertions",
+ "version_check",
+]
+
+[[package]]
 name = "socket2"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1227,6 +1243,12 @@ name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
+
+[[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "subtle"

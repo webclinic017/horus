@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 # EXTERNAL
 chrono = "0.4.19"
+smartstring = "1.0.1"

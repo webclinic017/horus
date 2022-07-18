@@ -27,25 +27,23 @@ impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Mark
             let order = Order { 
                 side: OrderSide::SELL, 
                 quantity: 1, 
-                price: None, 
-                expiration_date: None 
+                price: None
             };
-            let success = self.market.route_take_order(&order);
-            if success {
-                self.reporter.report(&order);
+            let res = self.market.route_take_order(&order);
+            if res == Some(position) {
+                self.reporter.add_position(&position);
             }
 
         }
         if result == Some(GoldenCrossSignalType::ShortOvertakes) {
             let order = Order { 
-                side: OrderSide::BUY, 
+                side: OrderSide::SELL, 
                 quantity: 1, 
-                price: None, 
-                expiration_date: None 
+                price: None
             };
-            let success = self.market.route_take_order(&order);
-            if success {
-                self.reporter.report(&order);
+            let res = self.market.route_take_order(&order);
+            if res == Some(position) {
+                self.reporter.add_position(&position);
             }
         }
     }

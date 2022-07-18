@@ -1,5 +1,5 @@
-use horus_finance::order::Order;
+use horus_finance::position::Position;
 
 pub trait Reporter {
-    fn report(&self, order: &Order);
+    fn add_position(&mut self, position: &Position);
 }

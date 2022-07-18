@@ -31,8 +31,7 @@ impl<'a, ConnectorOne: MarketConnector, ConnectorTwo: MarketConnector> InterMark
             let order = Order { 
                 side: horus_finance::order_side::OrderSide::SELL,
                 quantity: 0, 
-                price: None, 
-                expiration_date: None
+                price: None
             };
             //TODO: route order by magic string
             self.market_connector_01.route_take_order(&order);
