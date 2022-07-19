@@ -1,42 +1,63 @@
 use horus_exchanges::connectors::market_connector::MarketConnector;
-use horus_finance::{aggregate::Aggregate, order_side::OrderSide, position::Position};
+use horus_finance::{aggregate::Aggregate, order::Order, market_position::MarketPosition, order_side::OrderSide};
 use horus_reporters::reporter::Reporter;
 use rand::Rng;
-use smartstring::alias::String;
 
 use super::strategy::Strategy;
 
 pub struct MonteCarloAggregates<Market: MarketConnector, Rep: Reporter> {
     pub market: Market,
-    pub reporter: Rep
+    pub reporter: Rep,
+    current_side: MarketPosition
  }
 
 impl<Market: MarketConnector, Rep: Reporter> MonteCarloAggregates<Market, Rep> {
     pub fn new(market: Market, reporter: Rep) -> MonteCarloAggregates<Market, Rep> {
         MonteCarloAggregates {
             market,
-            reporter
+            reporter,
+            current_side: MarketPosition::NEUTRAL
         }
     }
-    pub fn next(&mut self, aggregate: Aggregate) {
-        let num = rand::thread_rng().gen_range(0..100);
-        let side;
 
-        if num >= 50 {
-            side = OrderSide::BUY;
+    fn take_action(&self) -> bool {
+        let ran = rand::thread_rng().gen_range(0..100);
+
+        50 > ran
+    }
+
+    fn generate_fake_order(&self) -> Order {
+
+        let lot = 10;
+
+        if self.current_side == MarketPosition::LONG {
+            Order {
+                side: OrderSide::SELL,
+                quantity: lot,
+                price: None
+            }
         } else {
-            side = OrderSide::SELL;
+            Order {
+                side: OrderSide::BUY,
+                quantity: lot,
+                price: None
+            }
         }
+    }
 
-        let position = Position {
-            exchange: self.market.get_exchange_name(),
-            market: self.market.get_market_name(),
-            quantity: 100 - num,
-            buy_price: aggregate.close,
-            sell_price: None
-        };
+    pub fn next(&mut self, _aggregate: Aggregate) {
+        let take_action = self.take_action();
 
-        self.reporter.add_position(&position);
+        if take_action {
+
+            let order = self.generate_fake_order();
+
+            let result = self.market.route_take_order(&order);
+
+            if let Ok(position) = result {
+                self.reporter.add_position(&position);
+            } 
+        }
     }
 }
 

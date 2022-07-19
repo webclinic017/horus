@@ -520,10 +520,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "horus_common"
-version = "0.1.0"
-
-[[package]]
 name = "horus_data_streams"
 version = "0.1.0"
 dependencies = [
@@ -559,6 +555,7 @@ dependencies = [
 name = "horus_reporters"
 version = "0.1.0"
 dependencies = [
+ "colored",
  "heapless",
  "horus_finance",
  "smartstring",

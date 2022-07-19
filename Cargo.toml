@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-    "horus_common",
     "horus_finance",
     "horus_data_streams",
     "horus_exchanges",
@@ -10,5 +9,4 @@ members = [
     "horus_backtesting",
     "horus_autoquant",
     "horus_agent",
-    # "horus_terminal/src-tauri"
 ]

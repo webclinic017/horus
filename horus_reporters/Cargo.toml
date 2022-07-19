@@ -10,3 +10,4 @@ horus_finance = { path = "../horus_finance" }
 # EXTERNAL
 heapless = "0.7.10"
 smartstring = "1.0.1"
+colored = "2.0.0"
