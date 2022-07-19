@@ -55,7 +55,8 @@ impl<Market: MarketConnector, Rep: Reporter> MonteCarloAggregates<Market, Rep> {
             let result = self.market.route_take_order(&order);
 
             if let Ok(position) = result {
-                self.reporter.add_position(&position);
+                self.reporter.update_cash_balance(10000.);
+                self.reporter.update_position(&position);
             } 
         }
     }

@@ -7,40 +7,26 @@ use crate::reporter::Reporter;
 static COLUMN_WIDTHS: [u8; 3] = [ 20, 16, 6 ];
 
 pub struct ConsoleReporter {
-    active_positions: Vec::<Position>,
+    exchange_name: String,
+    market_name: String,
+    market_currency_symbol: String,
+    initial_cash_balance: Option<f32>,
+    cash_balance: f32,
+    open_position: Option<Position>,
     closed_positions: Queue::<Position, 20>
 }
 
 impl ConsoleReporter {
-    pub fn new() -> ConsoleReporter {
+    pub fn new(exchange: &str, market: &str, currency: &str) -> ConsoleReporter {
         ConsoleReporter {
-            active_positions: Vec::<Position>::with_capacity(20),
+            exchange_name: exchange.to_string(),
+            market_name: market.to_string(),
+            market_currency_symbol: currency.to_string(),
+            initial_cash_balance: None,
+            cash_balance: 0.,
+            open_position: None,
             closed_positions: Queue::<Position, 20>::new()
          }
-    }
-
-    fn insert_active_position(&mut self, position: &Position) {
-        self.active_positions.push(*position);
-    }
-
-    fn remove_active_position(&mut self, new_position: &Position) {
-        
-        let mut index = 0;
-
-        loop {
-            if index >= self.active_positions.len() {
-                return
-            }
-
-            let pos = self.active_positions[index];
-
-            if pos.exchange == new_position.exchange && pos.market == new_position.market {
-                self.active_positions.remove(index);
-                return
-            }
-
-            index += 1;
-        }
     }
 
     fn clear_console(&self) {
@@ -48,12 +34,16 @@ impl ConsoleReporter {
     }
 
     fn render_header(&self) {
-        println!("AWESOME HEADER");
+
+        let mut padded = String::new();
+        self.pad(&"STATUS".to_string(), &mut padded, COLUMN_WIDTHS[2]);
+        print!("{}", padded.bold());
+        println!();
     }
 
     fn pad(&self, original: &String, padded: &mut String, length: u8) {
 
-        let index: u8 = 0;
+        let mut index: u8 = 0;
         let mut chars = original.chars();
 
         loop {
@@ -66,17 +56,11 @@ impl ConsoleReporter {
             } else {
                 padded.push(' ');
             }
+            index += 1;
         }
     }
 
     fn render_position(&self, position: &Position) {
-        let mut padded_exchange = String::new();
-        self.pad(&position.exchange.to_string(), &mut padded_exchange, COLUMN_WIDTHS[0]);
-        print!("{}", padded_exchange);
-        
-        let mut padded_market = String::new();
-        self.pad(&position.market.to_string(), &mut padded_market, COLUMN_WIDTHS[1]);
-        print!("{}", padded_market);
 
         let mut padded_side = String::new();
 
@@ -92,38 +76,87 @@ impl ConsoleReporter {
         println!();
     }
 
-    fn render_active_positions(&self) {
-        for position in &self.active_positions {
-            self.render_position(&position);
-        } 
+    fn render_open_position(&self) {
+        if let Some(pos) = self.open_position {
+            self.render_position(&pos);
+        }
     }
 
     fn render_closed_positions(&self) {
-        for position in &self.active_positions {
+        for position in &self.closed_positions {
             self.render_position(&position);
         }
     }
 
-    pub fn render_table(&mut self) {
+    fn render_intro_section(&self) {
 
-        self.clear_console();
+        let mut cash_balance_display = "?".to_string();
+        let mut cash_balance_indicator = "".to_string();
+
+        if let Some(init) = self.initial_cash_balance {
+            cash_balance_display = self.cash_balance.to_string();
+
+            let abs_diff = self.cash_balance - init;
+            let _rel_diff = (self.cash_balance / init - 1.) * 100.;
+
+            // if abs_diff > 0. {
+            //     cash_balance_indicator = "\u{2197}".green().to_string();
+            // }
+
+            // if abs_diff < 0. {
+            //     cash_balance_indicator = "\u{2198}".red().to_string();
+            // }
+
+            // if abs_diff == 0. {
+            //     cash_balance_indicator = "\u{27A1}".to_string();
+            // }
+            cash_balance_indicator = "\u{2198}".red().to_string();
+        }
+
+        println!("Status:       {}", "Active".green());
+        println!("Exchange:     {}", self.exchange_name);
+        println!("Market:       {}", self.market_name);
+        println!("Cash Balance: {}{} {}", cash_balance_display, self.market_currency_symbol, cash_balance_indicator);
+        println!();
+    }
+
+    fn render_table(&self) {
+
         self.render_header();
 
-        self.render_active_positions();
+        self.render_open_position();
         self.render_closed_positions();   
+    }
+
+    fn render(&self) {
+
+        self.clear_console();
+        self.render_intro_section();
+        self.render_table()
     }
 }
 
 impl Reporter for ConsoleReporter {
-    fn add_position(&mut self, position: &Position) {
 
-        self.remove_active_position(position);
+    fn update_cash_balance(&mut self, new_cash_balance: f32) {
+
+        if self.initial_cash_balance.is_none() {
+            self.initial_cash_balance = Some(new_cash_balance);
+        }
+
+        self.cash_balance = new_cash_balance;
+
+        self.render();
+    }
+
+    fn update_position(&mut self, position: &Position) {
 
         if position.sell_price.is_some() {
+            self.open_position = None;
             let _ = self.closed_positions.enqueue(*position);
         } else {
-            self.insert_active_position(position);
+            self.open_position = Some(*position);
         }
-        self.render_table();
+        self.render();
     }
 }

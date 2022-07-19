@@ -4,13 +4,15 @@ use horus_finance::{aggregate::Aggregate, order::Order, order_side::OrderSide, m
 
 use crate::connectors::market_connector::MarketConnector;
 
-static EXCHANGE_NAME: &'static str = "MOCK_EXCHANGE";
-static MARKET_NAME: &'static str = "MOCK_MARKET";
+static INIT_EXCHANGE_NAME: &'static str = "MOCK_EXCHANGE";
+static INIT_MARKET_NAME: &'static str = "MOCK_MARKET";
 
 pub struct MockMarketConnector {
     pub current_ask: RefCell<f32>,
     pub current_bid: RefCell<f32>,
     pub cash_balance: RefCell<f32>,
+    exchange_name_to_fake: String,
+    market_name_to_fake: String,
     current_position: RefCell<Option<Position>>
 }
 
@@ -20,6 +22,8 @@ impl MockMarketConnector {
             current_ask: RefCell::new(0.),
             current_bid: RefCell::new(0.),
             cash_balance: RefCell::new(initial_cash_balance),
+            exchange_name_to_fake: INIT_EXCHANGE_NAME.to_string(),
+            market_name_to_fake: INIT_MARKET_NAME.to_string(),
             current_position: RefCell::new(None)
         }
     }
@@ -31,6 +35,14 @@ impl MockMarketConnector {
     //     *mut_ref_ask = snapshot.current_ask;
     //     *mut_ref_bid = snapshot.current_bid;
     // }
+
+    pub fn set_fake_exchange_name(&mut self, name: &str) {
+        self.exchange_name_to_fake = name.to_string();
+    }
+
+    pub fn set_fake_market_name(&mut self, name: &str) {
+        self.market_name_to_fake = name.to_string();
+    }
 
     pub fn set_price(&self, bid: f32, ask: f32) {
         let mut mut_ref_bid = self.current_bid.borrow_mut();
@@ -73,8 +85,6 @@ impl MarketConnector for MockMarketConnector {
                 *cash_balance_ref -= cash_to_transfer;
                 
                 let position = Position {
-                    exchange: self.get_exchange_name(),
-                    market: self.get_market_name(),
                     quantity: order.quantity,
                     buy_price: price,
                     sell_price: None
@@ -102,8 +112,6 @@ impl MarketConnector for MockMarketConnector {
                 *cash_balance_ref += cash_to_transfer;
 
                 let position = Position {
-                    exchange: self.get_exchange_name(),
-                    market: self.get_market_name(),
                     quantity: order.quantity,
                     buy_price: current_pos.buy_price,
                     sell_price: Some(price)
@@ -135,8 +143,6 @@ impl MarketConnector for MockMarketConnector {
                 *cash_balance_ref -= cash_to_transfer;
 
                 let position = Position {
-                    exchange: self.get_exchange_name(),
-                    market: self.get_market_name(),
                     quantity: order.quantity,
                     buy_price: price,
                     sell_price: None
@@ -165,8 +171,6 @@ impl MarketConnector for MockMarketConnector {
                 *cash_balance_ref += cash_to_transfer;
 
                 let position = Position {
-                    exchange: self.get_exchange_name(),
-                    market: self.get_market_name(),
                     quantity: order.quantity,
                     buy_price: current_pos.buy_price,
                     sell_price: Some(price)
@@ -187,11 +191,11 @@ impl MarketConnector for MockMarketConnector {
         panic!("This connector is only used for backtesting and can not provide historical data")
     }
     
-    fn get_exchange_name(&self) -> &'static str {
-        EXCHANGE_NAME
+    fn get_exchange_name(&self) -> String {
+        (&self.exchange_name_to_fake).to_string()
     }
 
-    fn get_market_name(&self) -> &'static str {
-        MARKET_NAME
+    fn get_market_name(&self) -> String {
+        (&self.market_name_to_fake).to_string()
     }
 }

@@ -5,7 +5,6 @@ use crate::reporter::Reporter;
 pub struct VoidReporter {}
 
 impl Reporter for VoidReporter {
-    fn add_position(&mut self, _order: &Position) {
-        
-    }
+    fn update_cash_balance(&mut self, _new_cash_balance: f32) {}
+    fn update_position(&mut self, _order: &Position) {}
 }

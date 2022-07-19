@@ -31,7 +31,7 @@ impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Mark
             };
             let res = self.market.route_take_order(&order);
             if let Ok(position) = res {
-                self.reporter.add_position(&position);
+                self.reporter.update_position(&position);
             }
 
         }
@@ -43,7 +43,7 @@ impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Mark
             };
             let res = self.market.route_take_order(&order);
             if let Ok(position) = res {
-                self.reporter.add_position(&position);
+                self.reporter.update_position(&position);
             }
         }
     }
