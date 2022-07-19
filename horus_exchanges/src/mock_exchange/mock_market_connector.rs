@@ -5,6 +5,9 @@ use horus_finance::{aggregate::Aggregate, order::Order, order_side::OrderSide, m
 
 use crate::connectors::market_connector::MarketConnector;
 
+static EXCHANGE_NAME: &'static str = "MOCK_EXCHANGE";
+static MARKET_NAME: &'static str = "MOCK_MARKET";
+
 pub struct MockMarketConnector {
     pub current_ask: RefCell<f32>,
     pub current_bid: RefCell<f32>,
@@ -47,18 +50,6 @@ impl MockMarketConnector {
 
     pub fn get_cash_balance(&self) -> f32 {
         *self.cash_balance.borrow()
-    }
-
-    pub fn get_exchange_name(&self) -> &'static SmartString<LazyCompact> {
-        let mut exchange = String::new();
-        exchange.push_str("MOCK EXCHANGE");
-        &exchange
-    }
-
-    pub fn get_market_name(&self) -> &'static SmartString<LazyCompact> {
-        let mut market = String::new();
-        market.push_str("MOCK MARKET");
-        &market
     }
 }
 
@@ -195,5 +186,13 @@ impl MarketConnector for MockMarketConnector {
 
     fn get_historical_aggregates(&self, _start: chrono::DateTime<chrono::Utc>, _end: chrono::DateTime<chrono::Utc>) -> Vec<Aggregate> {
         panic!("This connector is only used for backtesting and can not provide historical data")
+    }
+    
+    fn get_exchange_name(&self) -> &'static str {
+        EXCHANGE_NAME
+    }
+
+    fn get_market_name(&self) -> &'static str {
+        MARKET_NAME
     }
 }

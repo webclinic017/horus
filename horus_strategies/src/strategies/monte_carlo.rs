@@ -28,15 +28,9 @@ impl<Market: MarketConnector, Rep: Reporter> MonteCarloAggregates<Market, Rep> {
             side = OrderSide::SELL;
         }
 
-        let mut exchange_s = String::new();
-        exchange_s.push_str("MONTE_FUTURES");
-
-        let mut market_s = String::new();
-        market_s.push_str("STONE/YEN");
-
         let position = Position {
-            exchange: &exchange_s,
-            market: &market_s,
+            exchange: self.market.get_exchange_name(),
+            market: self.market.get_market_name(),
             quantity: 100 - num,
             buy_price: aggregate.close,
             sell_price: None

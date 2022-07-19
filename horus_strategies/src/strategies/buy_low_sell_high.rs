@@ -30,7 +30,7 @@ impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Mark
                 price: None
             };
             let res = self.market.route_take_order(&order);
-            if res == Some(position) {
+            if let Ok(position) = res {
                 self.reporter.add_position(&position);
             }
 
@@ -42,7 +42,7 @@ impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Mark
                 price: None
             };
             let res = self.market.route_take_order(&order);
-            if res == Some(position) {
+            if let Ok(position) = res {
                 self.reporter.add_position(&position);
             }
         }
@@ -52,6 +52,6 @@ impl<'a, Market: MarketConnector, Rep: Reporter> BuyLowSellHighStrategy<'a, Mark
 impl<'a, Market: MarketConnector, Rep: Reporter> Strategy for BuyLowSellHighStrategy<'a, Market, Rep> {
     
     fn get_name() -> &'static str {
-        return "Buy Low Sell High";
+        "Buy Low Sell High"
     }
 }
