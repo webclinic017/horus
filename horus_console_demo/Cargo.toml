@@ -1,0 +1,12 @@
+[package]
+name = "horus_console_demo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# INTERNAL
+horus_finance = { path = "../horus_finance" }
+horus_exchanges = { path = "../horus_exchanges" }
+horus_data_streams = { path = "../horus_data_streams" }
+horus_reporters = { path = "../horus_reporters" }
+horus_strategies = { path = "../horus_strategies" }

@@ -4,8 +4,9 @@ use horus_finance::{aggregate::Aggregate, order::Order, order_side::OrderSide, m
 
 use crate::connectors::market_connector::MarketConnector;
 
-static INIT_EXCHANGE_NAME: &'static str = "MOCK_EXCHANGE";
-static INIT_MARKET_NAME: &'static str = "MOCK_MARKET";
+static INIT_EXCHANGE_NAME: &str = "MOCK_EXCHANGE";
+static INIT_MARKET_NAME: &str = "MOCK_MARKET";
+static INIT_CURRENCY_SYMBOL: &str = "$";
 
 pub struct MockMarketConnector {
     pub current_ask: RefCell<f32>,
@@ -13,6 +14,7 @@ pub struct MockMarketConnector {
     pub cash_balance: RefCell<f32>,
     exchange_name_to_fake: String,
     market_name_to_fake: String,
+    currency_symbol_to_fake: String,
     current_position: RefCell<Option<Position>>
 }
 
@@ -24,6 +26,7 @@ impl MockMarketConnector {
             cash_balance: RefCell::new(initial_cash_balance),
             exchange_name_to_fake: INIT_EXCHANGE_NAME.to_string(),
             market_name_to_fake: INIT_MARKET_NAME.to_string(),
+            currency_symbol_to_fake: INIT_CURRENCY_SYMBOL.to_string(),
             current_position: RefCell::new(None)
         }
     }
@@ -42,6 +45,10 @@ impl MockMarketConnector {
 
     pub fn set_fake_market_name(&mut self, name: &str) {
         self.market_name_to_fake = name.to_string();
+    }
+
+    pub fn set_fake_currency_symbol(&mut self, symbol: &str) {
+        self.currency_symbol_to_fake = symbol.to_string();
     }
 
     pub fn set_price(&self, bid: f32, ask: f32) {
@@ -66,7 +73,7 @@ impl MockMarketConnector {
 
 impl MarketConnector for MockMarketConnector {
 
-    fn route_make_order(&self, order: &Order) -> Result<Position, ()> {
+    fn route_make_order(&self, order: &Order) -> Result<Position, String> {
         
         let mut cash_balance_ref = self.cash_balance.borrow_mut();
         let mut pos_ref = self.current_position.borrow_mut();
@@ -79,7 +86,7 @@ impl MarketConnector for MockMarketConnector {
                 cash_to_transfer = order.quantity as f32 * price;
 
                 if cash_to_transfer > *cash_balance_ref {
-                    return Err(())
+                    return Err("Unable to proceed order due to insufficient cash balance".to_string())
                 }
 
                 *cash_balance_ref -= cash_to_transfer;
@@ -97,13 +104,13 @@ impl MarketConnector for MockMarketConnector {
             OrderSide::SELL => {
 
                 if pos_ref.is_none() {
-                    return Err(())
+                    return Err("Unable to close non existing position".to_string())
                 }
 
                 let current_pos = pos_ref.unwrap();
 
-                if order.quantity != current_pos.quantity { // Partial fills are currently not supported
-                    return Err(())
+                if order.quantity != current_pos.quantity {
+                    return Err("Partial fills are currently not supported".to_string())
                 }
 
                 price = order.price.unwrap();
@@ -124,7 +131,7 @@ impl MarketConnector for MockMarketConnector {
         }
     }
 
-    fn route_take_order(&self, order: &Order) -> Result<Position, ()> {
+    fn route_take_order(&self, order: &Order) -> Result<Position, String> {
         
         let mut cash_balance_ref = self.cash_balance.borrow_mut();
         let mut pos_ref = self.current_position.borrow_mut();
@@ -137,7 +144,7 @@ impl MarketConnector for MockMarketConnector {
                 cash_to_transfer = order.quantity as f32 * price;
 
                 if cash_to_transfer > *cash_balance_ref {
-                    return Err(())
+                    return Err("Unable to proceed order due to insufficient cash balance".to_string())
                 }
 
                 *cash_balance_ref -= cash_to_transfer;
@@ -156,13 +163,13 @@ impl MarketConnector for MockMarketConnector {
             OrderSide::SELL => {
 
                 if pos_ref.is_none() {
-                    return Err(())
+                    return Err("Unable to close non existing position".to_string())
                 }
 
                 let current_pos = pos_ref.unwrap();
 
-                if order.quantity != current_pos.quantity { // Partial fills are currently not supported
-                    return Err(())
+                if order.quantity != current_pos.quantity {
+                    return Err("Partial fills are currently not supported".to_string())
                 }
 
                 price = *self.current_bid.borrow();
@@ -197,5 +204,9 @@ impl MarketConnector for MockMarketConnector {
 
     fn get_market_name(&self) -> String {
         (&self.market_name_to_fake).to_string()
+    }
+
+    fn get_currency_symbol(&self) -> String {
+        (&self.currency_symbol_to_fake).to_string()
     }
 }

@@ -43,6 +43,13 @@ impl<const SHORT_MA: usize, const LONG_MA: usize> GoldenCrossSignal<SHORT_MA, LO
                 self.last_emmited_event = Some(GoldenCrossSignalType::LongOvertakes);
             }
         }
-        return None
+        
+        None
+    }
+}
+
+impl<const SHORT_MA: usize, const LONG_MA: usize> Default for GoldenCrossSignal<SHORT_MA, LONG_MA> {
+    fn default() -> Self {
+        Self::new()
     }
 }

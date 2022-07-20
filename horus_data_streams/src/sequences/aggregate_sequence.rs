@@ -57,6 +57,12 @@ impl<const SIZE: usize> AggregateSequence<SIZE> {
     }
 }
 
+impl<const SIZE: usize> Default for AggregateSequence<SIZE> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod moving_average_tests {
 

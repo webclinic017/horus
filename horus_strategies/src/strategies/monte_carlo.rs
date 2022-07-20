@@ -26,17 +26,19 @@ impl<Market: MarketConnector, Rep: Reporter> MonteCarloAggregates<Market, Rep> {
         50 > ran
     }
 
-    fn generate_fake_order(&self) -> Order {
+    fn generate_fake_order(&mut self) -> Order {
 
         let lot = 10;
 
         if self.current_side == MarketPosition::LONG {
+            self.current_side = MarketPosition::NEUTRAL;
             Order {
                 side: OrderSide::SELL,
                 quantity: lot,
                 price: None
             }
         } else {
+            self.current_side = MarketPosition::LONG;
             Order {
                 side: OrderSide::BUY,
                 quantity: lot,

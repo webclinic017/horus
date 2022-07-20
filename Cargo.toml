@@ -9,4 +9,5 @@ members = [
     "horus_backtesting",
     "horus_autoquant",
     "horus_agent",
+    "horus_console_demo"
 ]
