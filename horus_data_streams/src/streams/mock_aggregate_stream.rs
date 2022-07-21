@@ -22,7 +22,7 @@ impl<'a> MockAggregateStream<'a> {
 }
 
 impl<'a> DataStream<Aggregate> for MockAggregateStream<'a> {
-    fn start_listening(&mut self) {
+    fn start_listening(&mut self, _on_data: &mut dyn FnMut(Aggregate)) {
         panic!("This method is not available for this mocking class")
     }
 

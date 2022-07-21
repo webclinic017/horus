@@ -8,26 +8,24 @@ use crate::models::time_series_element::TimeSeriesElement;
 
 use super::data_stream::DataStream;
 
-pub struct BinanceFuturesAggregateStream<'a> {
+pub struct BinanceFuturesAggregateStream {
     market: Market,
     symbol: String,
-    interval: String,
-    on_data: &'a mut dyn FnMut(Aggregate)
+    interval: String
 }
 
-impl<'a> BinanceFuturesAggregateStream<'a> {
-    pub fn new(on_data: &'a mut dyn FnMut(Aggregate), symbol: String, interval: String) -> BinanceFuturesAggregateStream<'a> {
+impl BinanceFuturesAggregateStream {
+    pub fn new(symbol: String, interval: String) -> BinanceFuturesAggregateStream {
         BinanceFuturesAggregateStream {
             market: Binance::new(None, None),
             symbol,
-            interval,
-            on_data
+            interval
         }
     }
 }
 
-impl<'a> DataStream<Aggregate> for BinanceFuturesAggregateStream<'a> {
-    fn start_listening(&mut self) {
+impl DataStream<Aggregate> for BinanceFuturesAggregateStream {
+    fn start_listening(&mut self, on_data: &mut dyn FnMut(Aggregate)) {
             let keep_running = AtomicBool::new(true);
             let mut web_socket: WebSockets = WebSockets::new(|event: WebsocketEvent| {
                 if let WebsocketEvent::Kline(kline_event) = event {
@@ -35,7 +33,7 @@ impl<'a> DataStream<Aggregate> for BinanceFuturesAggregateStream<'a> {
                         open: kline_event.kline.open.parse::<f32>().unwrap(),
                         close: kline_event.kline.close.parse::<f32>().unwrap()
                     };
-                    (self.on_data)(new_aggregate);
+                    (on_data)(new_aggregate);
                 }
                 Ok(())
             });
@@ -44,7 +42,8 @@ impl<'a> DataStream<Aggregate> for BinanceFuturesAggregateStream<'a> {
         web_socket.connect(&kline).unwrap();
         web_socket.event_loop(&keep_running).unwrap();
     }
-
+    fn start_listening(&mut self, on_data: &mut dyn FnMut(Aggregate))
+    
     fn get_historical_data(&self, start: chrono::DateTime<chrono::Utc>, end: chrono::DateTime<chrono::Utc>) -> Vec<TimeSeriesElement<Aggregate>> {
 
         let start_time = u64::try_from(start.timestamp_millis()).unwrap();
